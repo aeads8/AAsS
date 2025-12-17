@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AAsS Interactive Codex</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom styles for chart containers as per requirements */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Custom button/display track styling */
+        .control-track {
+            display: flex;
+            width: 100%;
+            height: 3rem; /* 12 units = 3rem */
+            border-radius: 0.5rem; /* rounded-lg */
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); /* shadow-md */
+        }
+
+        .control-button {
+            width: 25%;
+            background-color: white;
+            font-weight: 800; /* font-extrabold */
+            transition: all 150ms ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem; /* text-xl */
+        }
+        
+        .control-button:hover {
+            background-color: var(--hover-color, #e0e7ff); /* Default light hover */
+        }
+
+        .control-display {
+            flex-grow: 1;
+            font-family: monospace;
+            font-weight: 700; /* font-bold */
+            font-size: 1.875rem; /* text-3xl */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans leading-relaxed">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm border-b border-slate-200 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="font-bold text-xl text-indigo-700 tracking-tight">AAsS Codex</div>
+                <div class="hidden md:flex space-x-8 text-sm font-medium text-slate-600">
+                    <a href="#core" class="hover:text-indigo-600 transition">The Core</a>
+                    <a href="#attributes" class="hover:text-indigo-600 transition">Attributes</a>
+                    <a href="#harm" class="hover:text-indigo-600 transition">Harm</a>
+                    <a href="#probability" class="hover:text-indigo-600 transition">Probability</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-20">
+
+        <!-- Hero Section -->
+        <section id="core" class="text-center space-y-6">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900">
+                Andrew's Asynchronous System
+            </h1>
+            
+            <div class="mt-10 p-8 bg-slate-900 rounded-2xl shadow-xl text-white max-w-3xl mx-auto transform hover:scale-[1.01] transition duration-300">
+                <div class="text-sm font-semibold text-indigo-300 uppercase tracking-wider mb-2">The Core Mechanic</div>
+                <div class="text-3xl md:text-5xl font-mono font-bold tracking-tight">
+                    3d6 + Modifier
+                </div>
+                <div class="mt-4 text-slate-400 border-t border-slate-700 pt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <span class="block text-indigo-400 font-bold text-lg">Attribute</span>
+                        <span class="text-xs">Permanent Skill (0 to +3)</span>
+                    </div>
+                    <div>
+                        <span class="block text-indigo-400 font-bold text-lg">Temp Bonus</span>
+                        <span class="text-xs">Momentum / Situational (-5 to +5)</span>
+                    </div>
+                    <div>
+                        <span class="block text-red-400 font-bold text-lg">Harm</span>
+                        <span class="text-xs">Physical Penalty (0 to -2)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Attributes Section -->
+        <section id="attributes">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Four Core Attributes</h2>
+                <p class="text-slate-600">
+                    Every character is defined by four core attributes. These provide your base competency. 
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Strength -->
+                <div class="group bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md hover:border-indigo-300 transition cursor-default">
+                    <div class="flex items-center mb-3">
+                        <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-lg mr-3">S</div>
+                        <h3 class="text-xl font-bold text-slate-800">Strength</h3>
+                    </div>
+                    <p class="text-slate-600">Physical Power, Endurance</p>
+                    <div class="mt-4 text-xs font-mono text-slate-400 group-hover:text-indigo-600 transition">Range: 0 to +3</div>
+                </div>
+
+                <!-- Dexterity -->
+                <div class="group bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md hover:border-indigo-300 transition cursor-default">
+                    <div class="flex items-center mb-3">
+                        <div class="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold text-lg mr-3">D</div>
+                        <h3 class="text-xl font-bold text-slate-800">Dexterity</h3>
+                    </div>
+                    <p class="text-slate-600">Agility, Quickness, Deftness</p>
+                    <div class="mt-4 text-xs font-mono text-slate-400 group-hover:text-indigo-600 transition">Range: 0 to +3</div>
+                </div>
+
+                <!-- Wit -->
+                <div class="group bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md hover:border-indigo-300 transition cursor-default">
+                    <div class="flex items-center mb-3">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg mr-3">W</div>
+                        <h3 class="text-xl font-bold text-slate-800">Wit</h3>
+                    </div>
+                    <p class="text-slate-600">Intelligence, Perception, Reasoning</p>
+                    <div class="mt-4 text-xs font-mono text-slate-400 group-hover:text-indigo-600 transition">Range: 0 to +3</div>
+                </div>
+
+                <!-- Soul -->
+                <div class="group bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md hover:border-indigo-300 transition cursor-default">
+                    <div class="flex items-center mb-3">
+                        <div class="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-lg mr-3">S</div>
+                        <h3 class="text-xl font-bold text-slate-800">Soul</h3>
+                    </div>
+                    <p class="text-slate-600">Willpower, Charisma, Empathy</p>
+                    <div class="mt-4 text-xs font-mono text-slate-400 group-hover:text-indigo-600 transition">Range: 0 to +3</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Harm Simulator Section -->
+        <section id="harm">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Harm</h2>
+                <p class="text-slate-600 mb-8">
+                    Damage is tracked as <strong>Damage Points (DP)</strong>. As you accumulate DP, your ability to succeed diminishes.
+                    Use the controls below to see how injuries affect your rolls.
+                </p>
+            </div>
+
+            <!-- Content Container (Updated to max-w-lg) -->
+            <!-- Adjusting Harm container width to match the visual width of the Modifier column on larger screens -->
+            <div class="max-w-lg mx-auto"> 
+                <!-- Interactive Harm Component -->
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
+                    <div class="flex justify-between items-end mb-4">
+                        <label for="harmControl" class="text-sm font-bold text-slate-500 uppercase tracking-wider">Accumulated Damage Points</label>
+                        <span id="dpDisplay" class="text-4xl font-extrabold text-red-600">0</span>
+                    </div>
+
+                    <!-- Harm Control -->
+                    <div id="harmControl" class="control-track border border-red-300 mt-4 mb-8" style="--hover-color: #fee2e2;">
+                        <!-- Minus Button -->
+                        <button onclick="changeHarm(-1)" class="control-button text-red-600 hover:bg-red-100">
+                            −
+                        </button>
+                        
+                        <!-- Display -->
+                        <div class="control-display bg-red-600 text-white font-mono font-bold">
+                            <span id="harmCurrentValue">0</span>
+                        </div>
+                        
+                        <!-- Plus Button -->
+                        <button onclick="changeHarm(1)" class="control-button text-red-600 hover:bg-red-100">
+                            +
+                        </button>
+                    </div>
+                    <!-- END Harm Control -->
+
+                    <!-- Dynamic Status Display -->
+                    <div id="harmStatusCard" class="p-6 rounded-xl border-l-4 transition-all duration-300 bg-green-50 border-green-500">
+                        <h3 id="statusTitle" class="text-2xl font-bold text-green-800 mb-2">Healthy</h3>
+                        <div class="flex justify-between items-center">
+                            <p id="statusDesc" class="text-green-700 font-medium">You are fit and ready.</p>
+                            <div class="text-right">
+                                <div class="text-xs uppercase text-slate-500 font-bold">Penalty</div>
+                                <div id="penaltyValue" class="text-3xl font-bold text-slate-800">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-2 text-center text-xs text-slate-400">
+                    <div>0-1 DP: Healthy (0 Penalty)</div>
+                    <div>2-3 DP: Bruised (-1 Penalty)</div>
+                    <div>4-5 DP: Injured (-2 Penalty)</div>
+                    <div>6+ DP: Broken (Incapacitated)</div>
+                </div>
+            </div>
+            <!-- End Content Container -->
+        </section>
+
+        <!-- Probability Analysis Section -->
+        <section id="probability">
+            <div class="grid grid-cols-1 lg:col-span-3 lg:grid-cols-3 gap-10">
+                
+                <!-- Text Content -->
+                <div class="lg:col-span-1 space-y-6">
+                    <h2 class="text-3xl font-bold text-slate-900">Calculating the Odds</h2>
+                    <p class="text-slate-600 text-sm">
+                        This system uses a bell curve (3d6). Small bonuses matter immensely. 
+                        Adjust the <strong>Total Modifier</strong> to see how your chances of success shift.
+                    </p>
+                    
+                    <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
+                        <label class="block text-xs font-bold text-indigo-900 uppercase mb-2">Total Modifier (Attribute + Temp + Harm)</label>
+                        
+                        <!-- Total Modifier Control (Existing button/display track) -->
+                        <div class="control-track border border-indigo-300" style="--hover-color: #e0e7ff;">
+                            <!-- Minus Button -->
+                            <button onclick="changeMod(-1)" class="control-button text-indigo-600 hover:bg-indigo-100">
+                                −
+                            </button>
+                            
+                            <!-- Display (The Track Center) -->
+                            <div class="control-display bg-indigo-600 text-white font-mono font-bold">
+                                <span id="modDisplay">+0</span>
+                            </div>
+                            
+                            <!-- Plus Button -->
+                            <button onclick="changeMod(1)" class="control-button text-indigo-600 hover:bg-indigo-100">
+                                +
+                            </button>
+                        </div>
+                        <!-- End Total Modifier Control -->
+
+                    </div>
+
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between border-b border-slate-100 py-1">
+                            <span class="font-semibold text-green-700">Critical Success (15+)</span>
+                            <span>Gain +2 Momentum</span>
+                        </div>
+                        <div class="flex justify-between border-b border-slate-100 py-1">
+                            <span class="font-semibold text-green-600">Full Success (11-14)</span>
+                            <span>Gain +1 Momentum</span>
+                        </div>
+                        <div class="flex justify-between border-b border-slate-100 py-1">
+                            <span class="font-semibold text-amber-600">Mixed Success (7-10)</span>
+                            <span>GM +1 Tension</span>
+                        </div>
+                        <div class="flex justify-between py-1">
+                            <span class="font-semibold text-red-600">Critical Failure (6-)</span>
+                            <span>GM +2 Tension</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Content -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white p-4 rounded-xl shadow-lg border border-slate-200">
+                        <div class="chart-container">
+                            <canvas id="probabilityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-900 text-slate-400 py-12 text-center">
+        <p class="text-sm">Andrew's Asynchronous System (AAsS)</p>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- 1. State Variables ---
+        let harmValue = 0; // Tracks Damage Points (DP)
+        let modifierValue = 0; // Tracks Total Modifier
+
+        // --- 2. Harm Logic ---
+        const harmCurrentValueDisplay = document.getElementById('harmCurrentValue');
+        const dpDisplay = document.getElementById('dpDisplay');
+        const harmStatusCard = document.getElementById('harmStatusCard');
+        const statusTitle = document.getElementById('statusTitle');
+        const statusDesc = document.getElementById('statusDesc');
+        const penaltyValue = document.getElementById('penaltyValue');
+
+        const harmStates = [
+            { threshold: 0, title: 'Healthy', desc: 'No penalties. You are fit.', penalty: 0, color: 'green', border: 'border-green-500', bg: 'bg-green-50', text: 'text-green-800' }, 
+            { threshold: 1, title: 'Healthy', desc: 'Just a scratch.', penalty: 0, color: 'green', border: 'border-green-500', bg: 'bg-green-50', text: 'text-green-800' }, 
+            { threshold: 2, title: 'Bruised', desc: 'Minor scrapes. Winded.', penalty: -1, color: 'orange', border: 'border-orange-500', bg: 'bg-orange-50', text: 'text-orange-800' }, 
+            { threshold: 3, title: 'Bruised', desc: 'Hurting, but moving.', penalty: -1, color: 'orange', border: 'border-orange-500', bg: 'bg-orange-50', text: 'text-orange-800' }, 
+            { threshold: 4, title: 'Injured', desc: 'Serious wound. Deep fatigue.', penalty: -2, color: 'red', border: 'border-red-500', bg: 'bg-red-50', text: 'text-red-800' }, 
+            { threshold: 5, title: 'Injured', desc: 'Barely holding on.', penalty: -2, color: 'red', border: 'border-red-500', bg: 'bg-red-50', text: 'text-red-800' }, 
+            { threshold: 6, title: 'Broken (Incapacitated)', desc: 'You are out of the fight.', penalty: 'X', color: 'slate', border: 'border-slate-800', bg: 'bg-slate-200', text: 'text-slate-800' }, 
+        ];
+
+        function getHarmState(dp) {
+            // Find state based on value (6+ is capped logic)
+            if (dp >= 6) return harmStates[6];
+            return harmStates.find(s => s.threshold === dp) || harmStates[0];
+        }
+
+        function updateHarm() {
+            harmCurrentValueDisplay.textContent = harmValue;
+            dpDisplay.textContent = harmValue;
+            
+            const state = getHarmState(harmValue);
+
+            statusTitle.textContent = state.title;
+            statusDesc.textContent = state.desc;
+            penaltyValue.textContent = state.penalty;
+
+            // Update styles dynamically
+            harmStatusCard.className = `p-6 rounded-xl border-l-4 transition-all duration-300 ${state.bg} ${state.border}`;
+            statusTitle.className = `text-2xl font-bold ${state.text} mb-2`;
+            statusDesc.className = `${state.text} font-medium`;
+        }
+
+        function changeHarm(amount) {
+            let next = harmValue + amount;
+            // Limit Harm between 0 and 8 (arbitrary cap, but 6+ is the 'Broken' tier)
+            if (next >= 0 && next <= 8) {
+                harmValue = next;
+                updateHarm();
+            }
+        }
+
+
+        // --- 3. Chart.js Probability Logic (Unchanged) ---
+        
+        const base3d6Freq = {
+            3: 1, 4: 3, 5: 6, 6: 10, 7: 15, 8: 21, 9: 25, 10: 27, 
+            11: 27, 12: 25, 13: 21, 14: 15, 15: 10, 16: 6, 17: 3, 18: 1
+        };
+        const totalCombinations = 216;
+
+        function getProbabilities(modifier) {
+            let counts = { critFail: 0, mixed: 0, full: 0, critSuccess: 0 };
+
+            for (let roll = 3; roll <= 18; roll++) {
+                let finalResult = roll + modifier;
+                let freq = base3d6Freq[roll];
+
+                if (finalResult >= 15) {
+                    counts.critSuccess += freq;
+                } else if (finalResult >= 11) {
+                    counts.full += freq;
+                } else if (finalResult >= 7) {
+                    counts.mixed += freq;
+                } else {
+                    counts.critFail += freq;
+                }
+            }
+
+            // Convert to percentages
+            return [
+                (counts.critFail / totalCombinations * 100).toFixed(1),
+                (counts.mixed / totalCombinations * 100).toFixed(1),
+                (counts.full / totalCombinations * 100).toFixed(1),
+                (counts.critSuccess / totalCombinations * 100).toFixed(1)
+            ];
+        }
+
+        const ctx = document.getElementById('probabilityChart').getContext('2d');
+        const probChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Crit Fail (6-)', 'Mixed (7-10)', 'Full (11-14)', 'Crit Success (15+)'],
+                datasets: [{
+                    label: '% Chance',
+                    data: getProbabilities(0),
+                    backgroundColor: [
+                        'rgba(220, 38, 38, 0.7)',   // Red (Fail)
+                        'rgba(217, 119, 6, 0.7)',   // Amber (Mixed)
+                        'rgba(22, 163, 74, 0.7)',   // Green (Full)
+                        'rgba(21, 128, 61, 0.9)'    // Dark Green (Crit)
+                    ],
+                    borderColor: [
+                        'rgb(220, 38, 38)',
+                        'rgb(217, 119, 6)',
+                        'rgb(22, 163, 74)',
+                        'rgb(21, 128, 61)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: { display: true, text: 'Probability (%)' }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // --- 4. Modifier Logic ---
+        const modDisplay = document.getElementById('modDisplay');
+
+        function updateModDisplay() {
+            modDisplay.textContent = (modifierValue >= 0 ? '+' : '') + modifierValue;
+            
+            // Update Chart
+            const newProbs = getProbabilities(modifierValue);
+            probChart.data.datasets[0].data = newProbs;
+            probChart.update();
+        }
+
+        function changeMod(amount) {
+            let next = modifierValue + amount;
+            // Limit Modifier between -5 and 8
+            if (next >= -5 && next <= 8) {
+                modifierValue = next;
+                updateModDisplay();
+            }
+        }
+
+        // --- 5. Initial Setup ---
+        // Initialize state displays and chart
+        window.onload = function() {
+            updateHarm();
+            updateModDisplay();
+        };
+
+    </script>
+</body>
+</html>
