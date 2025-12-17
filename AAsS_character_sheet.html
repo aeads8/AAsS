@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Andrew's Asynchronous System (AAsS) Character Sheet</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for a clean, futuristic look */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117; /* Dark background */
+        }
+        .container {
+            max-width: 500px;
+        }
+        /* Style to remove number arrows from input fields where they are not desired (like attribute scores) */
+        .attr-input {
+            appearance: textfield; /* Remove number arrows in Firefox */
+            -webkit-appearance: none; /* Remove number arrows in Chrome/Safari */
+            margin: 0;
+            text-align: center;
+        }
+        .attr-input::-webkit-outer-spin-button,
+        .attr-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        /* Level input will intentionally omit attr-input so arrows appear */
+    </style>
+</head>
+<body class="p-4 flex items-center justify-center min-h-screen">
+
+<div class="container bg-gray-800 p-6 sm:p-8 rounded-xl shadow-2xl w-full border border-gray-700">
+    
+    <h1 class="text-3xl font-bold text-indigo-400 mb-6 text-center">Andrew's Asynchronous System (AAsS) Character Sheet</h1>
+    <p class="text-gray-400 text-sm mb-6 text-center">Input your character's permanent bonuses, set any temporary modifiers, and click the 'Roll' button next to the desired attribute.</p>
+
+    <!-- Character Information -->
+    <div class="mb-6 bg-gray-700 p-4 rounded-lg border border-gray-600">
+        <h2 class="text-xl font-semibold text-gray-200 mb-3">Character Information</h2>
+        <p class="text-xs text-gray-400 mb-4">Name and Level are saved locally.</p>
+
+        <div class="space-y-3">
+            <div class="flex items-center justify-between gap-4">
+                <label for="charName" class="text-gray-300 font-medium w-1/4">Name:</label>
+                <input type="text" id="charName" value=""
+                       class="w-3/4 px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-lg text-white focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                       oninput="saveCharInfo()">
+            </div>
+            <div class="flex items-center justify-between gap-4">
+                <label for="charLevel" class="text-gray-300 font-medium w-1/4">Level:</label>
+                <!-- Note: attr-input class is intentionally omitted here so up/down arrows show -->
+                <input type="number" id="charLevel" value="1" min="1" max="99"
+                       class="w-3/4 px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-lg text-white text-center focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                       oninput="saveCharInfo()">
+            </div>
+        </div>
+    </div>
+    <!-- End Character Information -->
+
+
+    <!-- Momentum Tracker -->
+    <div class="mb-6 bg-gray-700 p-4 rounded-lg border border-gray-600">
+        <h2 class="text-xl font-semibold text-gray-200 mb-3">Momentum</h2>
+        <p class="text-xs text-gray-400 mb-4">Track your current momentum (saved locally).</p>
+
+        <div class="flex items-center justify-between gap-4">
+            <label for="momentumPoints" class="text-gray-300 font-medium w-1/2">Current Momentum:</label>
+            <input type="number" id="momentumPoints" value="0" min="-5" max="5"
+                   class="attr-input w-1/2 px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-xl text-white focus:ring-indigo-500 focus:border-indigo-500"
+                   oninput="saveMomentum()">
+        </div>
+    </div>
+
+    <!-- Defense and Vitals Tracker REMOVED -->
+
+
+    <!-- Character Attribute Setup and Temporary Bonus (Combined) -->
+    <div class="mb-6 bg-gray-700 p-4 rounded-lg border border-gray-600">
+        <h2 class="text-xl font-semibold text-gray-200 mb-3">Abilities</h2>
+        <p class="text-xs text-gray-400 mb-4">Permanent scores saved locally on this browser.</p>
+
+        <div id="attributeInputs" class="space-y-3">
+            <!-- Dynamic Attribute Inputs and Roll Buttons -->
+        </div>
+
+        <!-- Additional Penalty or Bonus (Moved Here) -->
+        <div class="pt-4 mt-4 border-t border-gray-600">
+            <label for="tempBonus" class="block text-sm font-medium text-gray-300 mb-2">Additional Penalty or Bonus (e.g., Momentum spent, situational effects):</label>
+            <input type="number" id="tempBonus" value="0" min="-5" max="5"
+                   class="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-lg text-white focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                   placeholder="Range: -5 to +5">
+        </div>
+    </div>
+    
+    <!-- Results Display (MOVED HERE) -->
+    <div id="results" class="mb-6 p-5 bg-gray-900 rounded-xl border border-gray-700 hidden">
+        <!-- MODIFIED: Added span for attribute name -->
+        <h2 class="text-xl font-semibold text-gray-200 mb-3 border-b border-gray-700 pb-2">Check Outcome: <span id="checkAttributeName" class="text-indigo-400 font-extrabold"></span></h2>
+        
+        <!-- NEW: Added Timestamp -->
+        <p class="text-sm text-gray-400 text-center mb-4">Check Time: <span id="checkTimestamp" class="text-xs text-gray-300"></span></p>
+
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+            <!-- Total -->
+            <div class="w-1/2 text-center">
+                <p class="text-sm text-gray-400 mb-1">Total Modifier Used:</p>
+                <div id="totalBonusDisplay" class="text-xl font-extrabold text-indigo-400"></div>
+            </div>
+            <div class="w-1/2 text-center">
+                <p class="text-sm text-gray-400 mb-1">Final Roll (3d6 + Mod):</p>
+                <div id="finalTotal" class="text-4xl font-extrabold text-white"></div>
+            </div>
+        </div>
+        
+        <!-- Dice Breakdown -->
+        <p class="text-sm text-gray-400 text-center mb-4">Dice Rolls (3d6): <span id="diceValues" class="text-lg font-mono text-yellow-400 font-bold"></span></p>
+
+        <!-- Outcome -->
+        <div class="mt-4 pt-3 border-t border-gray-700">
+            <p class="text-sm font-medium text-gray-300">Result Tier:</p>
+            <div id="outcomeText" class="text-xl font-bold rounded-lg px-2 py-1 mt-1 text-center"></div>
+            <p id="outcomeEffect" class="text-sm text-gray-400 mt-2"></p>
+        </div>
+    </div>
+    
+    <!-- Harm Status Input and Display -->
+    <div class="mb-6 bg-gray-700 p-4 rounded-lg border border-gray-600">
+        <h2 class="text-xl font-semibold text-gray-200 mb-3">Harm Status (Damage Points)</h2>
+        <!-- UPDATED DESCRIPTION FOR NEW RULES -->
+        <p class="text-xs text-gray-400 mb-4">Set your Damage Points (DP) to automatically calculate the penalty. (0-1 DP: 0 penalty, 2-3 DP: -1, 4-5 DP: -2, 6+ DP: Broken)</p>
+
+        <div class="space-y-3">
+            <div class="flex items-center justify-between gap-4">
+                <label for="damagePoints" class="text-gray-300 font-medium w-1/2">Damage Points (DP):</label>
+                <input type="number" id="damagePoints" value="0" min="0" max="99"
+                       class="attr-input w-1/2 px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-lg text-white focus:ring-indigo-500 focus:border-indigo-500"
+                       oninput="handleDamagePointsChange()">
+            </div>
+            <div class="flex items-center justify-between gap-4 pt-2 border-t border-gray-600">
+                <p class="text-gray-300 font-medium w-1/2">Current Condition / Penalty:</p>
+                <div id="harmDisplay" class="w-1/2 text-right">
+                    <span id="conditionText" class="text-base font-semibold text-green-400">Healthy</span>
+                    (<span id="penaltyText" class="text-base font-semibold text-green-400">0</span>)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section (Split from previous combined section) -->
+    <div class="mb-6 bg-gray-700 p-4 rounded-lg border border-gray-600">
+        <h2 class="text-xl font-semibold text-gray-200 mb-3">Notes</h2>
+        <textarea id="notesArea" rows="4" 
+                  class="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-sm text-white focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 resize-none"
+                  placeholder="Special Abilities, Background, Important Details"
+                  oninput="saveNotes()"></textarea>
+    </div>
+
+    <!-- Equipment Section (New section for Inventory) -->
+    <div class="mb-6 bg-gray-700 p-4 rounded-lg border border-gray-600">
+        <h2 class="text-xl font-semibold text-gray-200 mb-3">Equipment</h2>
+        <textarea id="equipmentArea" rows="4" 
+                  class="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-sm text-white focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 resize-none"
+                  placeholder="Inventory, Armor, Weapons, Resources"
+                  oninput="saveEquipment()"></textarea>
+    </div>
+
+</div>
+
+<script>
+    const ATTRIBUTES = ['Strength', 'Dexterity', 'Wit', 'Soul'];
+    const DEFAULT_BONUSES = { Strength: 0, Dexterity: 0, Wit: 0, Soul: 0 };
+    
+    // Storage Keys
+    const STORAGE_KEY = 'm_m_attribute_bonuses';
+    const DP_STORAGE_KEY = 'm_m_damage_points';
+    const MOMENTUM_STORAGE_KEY = 'm_m_momentum_points'; 
+    const NAME_STORAGE_KEY = 'AASS_char_name';
+    const LEVEL_STORAGE_KEY = 'AASS_char_level';
+    // Defense storage key removed
+    const NOTES_STORAGE_KEY = 'AASS_notes_data';
+    const EQUIPMENT_STORAGE_KEY = 'AASS_equipment_data'; // New Key for Equipment
+
+
+    // --- Character Info Logic ---
+    function loadCharInfo() {
+        const name = localStorage.getItem(NAME_STORAGE_KEY) || '';
+        const level = parseInt(localStorage.getItem(LEVEL_STORAGE_KEY)) || 1; 
+        return { name, level };
+    }
+
+    function saveCharInfo() {
+        const nameInput = document.getElementById('charName');
+        const levelInput = document.getElementById('charLevel');
+        
+        localStorage.setItem(NAME_STORAGE_KEY, nameInput.value);
+        localStorage.setItem(LEVEL_STORAGE_KEY, parseInt(levelInput.value) || 1);
+    }
+
+    // --- Defense Logic (REMOVED) ---
+    /*
+    function loadDefense() {
+        // Removed as per request
+    }
+    
+    function saveDefense() {
+        // Removed as per request
+    }
+    */
+
+    // --- Notes Logic ---
+    
+    function loadNotes() {
+        return localStorage.getItem(NOTES_STORAGE_KEY) || '';
+    }
+
+    function saveNotes() {
+        const notes = document.getElementById('notesArea').value;
+        localStorage.setItem(NOTES_STORAGE_KEY, notes);
+    }
+    
+    // --- Equipment Logic (New) ---
+    
+    function loadEquipment() {
+        return localStorage.getItem(EQUIPMENT_STORAGE_KEY) || '';
+    }
+
+    function saveEquipment() {
+        const equipment = document.getElementById('equipmentArea').value;
+        localStorage.setItem(EQUIPMENT_STORAGE_KEY, equipment);
+    }
+
+    // --- Harm Calculation Logic ---
+
+    function calculateHarmStatus(dp) {
+        // 0-1 DP: 0, 2-3 DP: -1, 4-5 DP: -2, 6+ DP: Broken
+        if (dp >= 6) {
+            return { status: 'Broken (6+ DP)', penalty: -99, color: 'text-red-400' };
+        } else if (dp >= 4) { // 4 or 5 DP
+            return { status: 'Injured (4-5 DP)', penalty: -2, color: 'text-red-400' };
+        } else if (dp >= 2) { // 2 or 3 DP
+            return { status: 'Bruised (2-3 DP)', penalty: -1, color: 'text-orange-400' };
+        } else { // 0 or 1 DP
+            return { status: 'Healthy (0-1 DP)', penalty: 0, color: 'text-green-400' };
+        }
+    }
+
+    function loadDamagePoints() {
+        const stored = localStorage.getItem(DP_STORAGE_KEY);
+        return parseInt(stored) || 0;
+    }
+
+    function handleDamagePointsChange() {
+        const dpInput = document.getElementById('damagePoints');
+        let dp = parseInt(dpInput.value) || 0;
+        
+        // Enforce min 0
+        if (dp < 0) dp = 0;
+        dpInput.value = dp;
+
+        const { status, penalty, color } = calculateHarmStatus(dp);
+        
+        // Update display
+        const conditionTextEl = document.getElementById('conditionText');
+        const penaltyTextEl = document.getElementById('penaltyText');
+        
+        conditionTextEl.textContent = status;
+        conditionTextEl.className = `text-base font-semibold ${color}`;
+        
+        const penaltyDisplay = penalty <= -99 ? 'N/A' : (penalty === 0 ? '0' : penalty);
+        penaltyTextEl.textContent = penaltyDisplay;
+        penaltyTextEl.className = `text-base font-semibold ${penalty === 0 ? 'text-green-400' : 'text-red-400'}`;
+
+        // Update Roll Buttons based on penalty
+        updateRollButtons(penalty);
+
+        // Save DP to storage
+        localStorage.setItem(DP_STORAGE_KEY, dp);
+    }
+    
+    function updateRollButtons(currentPenalty) {
+        const isBroken = currentPenalty <= -99;
+        
+        document.querySelectorAll('.roll-attr-button').forEach(button => {
+            if (isBroken) {
+                // Critical state: disable and turn red
+                button.disabled = true;
+                button.classList.remove('bg-indigo-600', 'hover:bg-indigo-500');
+                button.classList.add('bg-red-700', 'hover:bg-red-600');
+                button.textContent = "Broken";
+            } else {
+                // Normal state: enable and turn indigo
+                button.disabled = false;
+                button.classList.remove('bg-red-700', 'hover:bg-red-600');
+                button.classList.add('bg-indigo-600', 'hover:bg-indigo-500');
+                button.textContent = "Roll";
+            }
+        });
+    }
+
+    // --- Momentum Logic ---
+    
+    function loadMomentum() {
+        const stored = localStorage.getItem(MOMENTUM_STORAGE_KEY);
+        // Default to 0 if not found
+        return parseInt(stored) || 0;
+    }
+
+    function saveMomentum() {
+        const momentumInput = document.getElementById('momentumPoints');
+        // Ensure the value is treated as a number and saved
+        let m = parseInt(momentumInput.value) || 0;
+        localStorage.setItem(MOMENTUM_STORAGE_KEY, m);
+    }
+
+    // --- Character & Attribute Logic ---
+
+    function setupAttributeInputs() {
+        const inputContainer = document.getElementById('attributeInputs');
+        const storedBonuses = loadBonuses();
+
+        ATTRIBUTES.forEach(attr => {
+            // Create Input Fields and Button
+            const inputDiv = document.createElement('div');
+            inputDiv.className = 'flex items-center justify-between gap-2';
+            inputDiv.innerHTML = `
+                <label for="${attr}Bonus" class="text-gray-300 text-sm font-medium w-1/4">${attr}</label>
+                <input type="number" id="${attr}Bonus" value="${storedBonuses[attr] || 0}" min="0" max="3"
+                       class="attr-input w-1/4 px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-lg text-white focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                       onchange="saveBonuses()">
+                <button id="roll-${attr}" data-attribute="${attr}" 
+                        class="roll-attr-button w-1/2 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-2 rounded-lg transition duration-150 text-sm shadow-lg shadow-indigo-500/30">
+                    Roll
+                </button>
+            `;
+            inputContainer.appendChild(inputDiv);
+        });
+
+        // Add event listeners after all buttons are created
+        document.querySelectorAll('.roll-attr-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const attr = button.getAttribute('data-attribute');
+                rollCheck(attr);
+            });
+        });
+    }
+
+    function saveBonuses() {
+        const bonuses = {};
+        ATTRIBUTES.forEach(attr => {
+            const input = document.getElementById(`${attr}Bonus`);
+            bonuses[attr] = parseInt(input.value) || 0;
+        });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(bonuses));
+    }
+
+    function loadBonuses() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            const loadedData = JSON.parse(stored);
+            const currentBonuses = {};
+            ATTRIBUTES.forEach(attr => {
+                 if (attr === 'Strength' && loadedData['Body'] !== undefined) {
+                    currentBonuses[attr] = loadedData['Strength'] !== undefined ? loadedData['Strength'] : loadedData['Body'];
+                 } else {
+                    currentBonuses[attr] = loadedData[attr] !== undefined ? loadedData[attr] : DEFAULT_BONUSES[attr];
+                 }
+            });
+            return currentBonuses;
+        }
+        return DEFAULT_BONUSES;
+    }
+
+    // --- Rolling Logic ---
+
+    function rollDie() {
+        return Math.floor(Math.random() * 6) + 1;
+    }
+
+    function rollCheck(selectedAttribute) {
+        // 1. Get Modifiers
+        const tempBonusInput = document.getElementById('tempBonus');
+        const tempBonus = parseInt(tempBonusInput.value) || 0;
+        
+        const dp = loadDamagePoints();
+        const { penalty: harmPenalty } = calculateHarmStatus(dp);
+        
+        if (harmPenalty <= -99) {
+            alert("You are Broken (Critical Harm) and cannot perform a Skill Check.");
+            return; 
+        }
+
+        const attrBonusInput = document.getElementById(`${selectedAttribute}Bonus`);
+        const attrBonus = parseInt(attrBonusInput.value) || 0;
+
+        // Total Modifier = Attribute Bonus + Temporary Bonus (Momentum/Situational) + Harm Penalty
+        const totalBonus = attrBonus + tempBonus + harmPenalty;
+        
+        // 2. Roll 3d6
+        const d1 = rollDie();
+        const d2 = rollDie();
+        const d3 = rollDie();
+        const diceSum = d1 + d2 + d3;
+        const finalTotal = diceSum + totalBonus;
+
+        // 3. Determine Outcome
+        let outcome = {
+            text: '',
+            effect: '',
+            color: ''
+        };
+
+        if (finalTotal >= 15) {
+            outcome.text = 'Critical Success (15+)';
+            outcome.effect = 'Spectacular success! Gain 2 points of Momentum.';
+            outcome.color = 'bg-green-700 text-white';
+        } else if (finalTotal >= 11) { // 11-14
+            outcome.text = 'Full Success (11-14)';
+            outcome.effect = 'Clean success. Gain 1 point of Momentum.';
+            outcome.color = 'bg-green-500 text-gray-900';
+        } else if (finalTotal >= 7) { // 7-10
+            outcome.text = 'Mixed Success (7-10)';
+            outcome.effect = 'Success with a cost. GM gains 1 point of Tension.';
+            outcome.color = 'bg-yellow-500 text-gray-900';
+        } else { // 6-
+            outcome.text = 'Critical Failure (6-)';
+            outcome.effect = 'Disastrous failure. GM gains 2 points of Tension.';
+            outcome.color = 'bg-red-700 text-white';
+        }
+
+        // 4. Update Display
+        
+        // Update Attribute Name in Header
+        document.getElementById('checkAttributeName').textContent = selectedAttribute;
+
+        // Update Timestamp
+        const now = new Date();
+        const timestampString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' on ' + now.toLocaleDateString('en-US');
+        document.getElementById('checkTimestamp').textContent = timestampString;
+
+        document.getElementById('totalBonusDisplay').textContent = totalBonus >= 0 ? `+${totalBonus}` : totalBonus;
+        document.getElementById('diceValues').textContent = `${d1} + ${d2} + ${d3}`;
+        document.getElementById('finalTotal').textContent = finalTotal;
+        
+        const outcomeTextDiv = document.getElementById('outcomeText');
+        outcomeTextDiv.textContent = outcome.text;
+        outcomeTextDiv.className = `text-xl font-bold rounded-lg px-2 py-1 mt-1 text-center ${outcome.color}`;
+        
+        document.getElementById('outcomeEffect').textContent = outcome.effect;
+        document.getElementById('results').classList.remove('hidden');
+
+        // 5. Copy Result to Clipboard
+        const bonusSign = totalBonus >= 0 ? '+' : '';
+        const harmDesc = harmPenalty < 0 && harmPenalty > -99 ? ` (Harm ${harmPenalty})` : '';
+        const clipboardText = `[${selectedAttribute} Check] 3d6 ${bonusSign}${totalBonus}${harmDesc} (Total ${finalTotal}): ${outcome.text}. Effect: ${outcome.effect}`;
+        copyToClipboard(clipboardText, selectedAttribute);
+    }
+
+    // Helper function to copy text to clipboard
+    function copyToClipboard(text, attr) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+
+        try {
+            document.execCommand('copy');
+            const button = document.getElementById(`roll-${attr}`);
+            const originalText = button.textContent;
+            
+            // Notification effect
+            button.textContent = "Copied!";
+            button.classList.add('bg-blue-600', 'hover:bg-blue-600');
+            button.classList.remove('bg-indigo-600', 'hover:bg-indigo-500', 'bg-red-700', 'hover:bg-red-600');
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                // Reapply the correct state color (either indigo or red if broken)
+                const { penalty } = calculateHarmStatus(loadDamagePoints());
+                if (penalty <= -99) {
+                    button.classList.add('bg-red-700', 'hover:bg-red-600');
+                } else {
+                    button.classList.add('bg-indigo-600', 'hover:bg-indigo-500');
+                }
+                button.classList.remove('bg-blue-600', 'hover:bg-blue-600');
+            }, 1500);
+            
+        } catch (err) {
+            console.error('Could not copy text: ', err);
+        }
+        document.body.removeChild(textarea);
+    }
+
+    // Simple custom alert implementation (since standard alerts are forbidden)
+    function alert(message) {
+        const existingAlert = document.getElementById('custom-alert');
+        if (existingAlert) existingAlert.remove();
+        
+        const alertDiv = document.createElement('div');
+        alertDiv.id = 'custom-alert';
+        alertDiv.className = 'fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50';
+        alertDiv.innerHTML = `
+            <div class="bg-red-800 p-6 rounded-xl shadow-2xl border-2 border-red-500 max-w-sm text-center">
+                <p class="text-white font-semibold mb-4">${message}</p>
+                <button onclick="document.getElementById('custom-alert').remove()" 
+                        class="bg-red-500 hover:bg-red-400 text-white font-bold py-2 px-4 rounded-lg transition">
+                    OK
+                </button>
+            </div>
+        `;
+        document.body.appendChild(alertDiv);
+    }
+
+
+    // --- Run on Load ---
+    function initializeApp() {
+        setupAttributeInputs();
+        
+        // Load Character Info
+        const { name: initialName, level: initialLevel } = loadCharInfo();
+        document.getElementById('charName').value = initialName;
+        document.getElementById('charLevel').value = initialLevel;
+
+        // Defense loading removed
+
+        // Load Notes
+        document.getElementById('notesArea').value = loadNotes();
+        
+        // Load Equipment
+        document.getElementById('equipmentArea').value = loadEquipment();
+
+        // Load and set initial DP value
+        const initialDP = loadDamagePoints();
+        document.getElementById('damagePoints').value = initialDP;
+        
+        // Load and set initial Momentum value
+        const initialMomentum = loadMomentum();
+        document.getElementById('momentumPoints').value = initialMomentum;
+        
+        // Trigger the change handler to calculate status and update buttons on load
+        handleDamagePointsChange(); 
+    }
+
+    window.onload = initializeApp;
+</script>
+
+</body>
+</html>
