@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Andrew's Asynchronous System: Interactive System Guide</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f7f7f7; }
+        
+        /* Chart Container Styling Constraints */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px; /* Constraint width */
+            margin-left: auto;
+            margin-right: auto;
+            height: 40vh; /* Responsive height */
+            max-height: 400px; /* Vertical constraint */
+        }
+
+        /* Style to remove number arrows from input fields */
+        input[type=number] {
+            -moz-appearance: textfield; /* Firefox */
+        }
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Custom Scrollbar */
+        .custom-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background-color: #9ca3af; /* Gray-400 */
+            border-radius: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background-color: #e5e7eb; /* Gray-200 */
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8 bg-gray-100">
+
+<div class="max-w-4xl mx-auto space-y-8">
+    
+    <header class="text-center">
+        <h1 class="4xl sm:text-5xl font-extrabold text-gray-800 mb-2">Andrew's Asynchronous System (AAsS)</h1>
+        <p class="text-lg text-gray-600">Core Mechanics & Interactive Guide</p>
+    </header>
+
+    <!-- SECTION 1: Roll Check Mechanic (3d6) -->
+    <section class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-indigo-500">
+        <h2 class="text-3xl font-bold text-indigo-700 mb-4 border-b pb-2">1. The Roll Check</h2>
+        <p class="text-gray-700 mb-4">The core mechanic is based on a 3d6 roll, aiming for higher results. The formula is: <code class="bg-gray-200 p-1 rounded font-mono">3d6 + Total Modifier</code>.</p>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="text-sm font-semibold text-gray-600 mb-1">Total Modifier =</p>
+                <p class="text-lg font-bold text-gray-800">Attribute Bonus + Temporary Bonus + Harm Penalty</p>
+            </div>
+            <div class="p-4 bg-indigo-50 rounded-lg">
+                <p class="text-sm font-semibold text-indigo-700 mb-1">Thresholds (Target Number)</p>
+                
+                <!-- Updated Thresholds with Colors -->
+                <p class="text-lg font-bold text-gray-800">
+                    <span class="text-green-600">Critical Success: 15+</span> | 
+                    <span class="text-blue-600">Full Success: 11-14</span> | 
+                    <span class="text-yellow-600">Mixed Success: 7-10</span> | 
+                    <span class="text-red-600">Critical Failure: 6-</span>
+                </p>
+                <!-- End: Updated Thresholds with Colors -->
+            </div>
+        </div>
+
+        <div class="chart-container mt-6">
+            <canvas id="rollChart"></canvas>
+        </div>
+    </section>
+
+    <!-- SECTION 2: Momentum & Tension (Static Informational Section) -->
+    <section class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-teal-500">
+        <h2 class="text-3xl font-bold text-teal-700 mb-4 border-b pb-2">2. Momentum & Tension</h2>
+        <p class="text-gray-700 mb-4">These two resources track the narrative flow and difficulty of the game. Momentum is the player resource, and Tension is the Game Master (GM) resource.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Momentum Card -->
+            <div class="p-4 bg-teal-50 rounded-lg shadow-inner border-l-4 border-teal-600">
+                <h3 class="text-xl font-bold text-teal-800 mb-2">Momentum (Player)</h3>
+                <p class="text-sm text-gray-700 mb-3">
+                    Momentum is a reward for players given for successful checks. Momentum may be spent to aid the player.
+                </p>
+                <ul class="list-disc list-inside text-sm space-y-1 text-gray-600">
+                    <li>Gained on Full Success (+1) and Critical Success (+2).</li>
+                    <li>Spent by the players to assist on rolls or with the scene.</li>
+                </ul>
+                
+                <!-- START: Momentum Usage Options -->
+                <div class="mt-4 space-y-3">
+                    <!-- Option 1: Add Bonus -->
+                    <div class="p-3 bg-teal-100 rounded-lg shadow-sm border border-teal-300">
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="font-bold text-teal-800">Add Bonus</h4>
+                            <span class="text-sm font-semibold text-teal-600 bg-teal-200 px-2 py-0.5 rounded-full">Cost: 1</span>
+                        </div>
+                        <p class="text-xs text-gray-700">Add +2 to any Skill Check before rolling.</p>
+                    </div>
+
+                    <!-- Option 2: Re-Roll -->
+                    <div class="p-3 bg-teal-100 rounded-lg shadow-sm border border-teal-300">
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="font-bold text-teal-800">Re-Roll</h4>
+                            <span class="text-sm font-semibold text-teal-600 bg-teal-200 px-2 py-0.5 rounded-full">Cost: 2</span>
+                        </div>
+                        <p class="text-xs text-gray-700">Re-roll any result. You must accept the new result.</p>
+                    </div>
+
+                    <!-- Option 3: Declare Fact -->
+                    <div class="p-3 bg-teal-100 rounded-lg shadow-sm border border-teal-300">
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="font-bold text-teal-800">Declare Fact</h4>
+                            <span class="text-sm font-semibold text-teal-600 bg-teal-200 px-2 py-0.5 rounded-full">Cost: 3</span>
+                        </div>
+                        <p class="text-xs text-gray-700">Define a minor, helpful fact about the scene.</p>
+                    </div>
+                </div>
+                <!-- END: Momentum Usage Options -->
+            </div>
+
+            <!-- Tension Card -->
+            <div class="p-4 bg-pink-50 rounded-lg shadow-inner border-l-4 border-pink-600">
+                <h3 class="text-xl font-bold text-pink-800 mb-2">Tension (GM)</h3>
+                <p class="text-sm text-gray-700 mb-3">
+                    Tension is a resource given to the GM when the player fails checks. Tension may be spent by the GM.
+                </p>
+                <ul class="list-disc list-inside text-sm space-y-1 text-gray-600">
+                    <li>Gained on Mixed Success (+1) and Critical Success (+2).</li>
+                    <li>Spent by the GM to introduce complications, trigger enemy actions, or reinforce threats.</li>
+                </ul>
+
+                <!-- START: Tension Usage Options -->
+                <div class="mt-4 space-y-3">
+                    <!-- Option 1: Complication -->
+                    <div class="p-3 bg-pink-100 rounded-lg shadow-sm border border-pink-300">
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="font-bold text-pink-800">Complication</h4>
+                            <span class="text-sm font-semibold text-pink-600 bg-pink-200 px-2 py-0.5 rounded-full">Cost: 1</span>
+                        </div>
+                        <p class="text-xs text-gray-700">Introduce a minor enemy, small hazard, or degrade a Full Success to Mixed.</p>
+                    </div>
+
+                    <!-- Option 2: Escalate -->
+                    <div class="p-3 bg-pink-100 rounded-lg shadow-sm border border-pink-300">
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="font-bold text-pink-800">Escalate</h4>
+                            <span class="text-sm font-semibold text-pink-600 bg-pink-200 px-2 py-0.5 rounded-full">Cost: 2</span>
+                        </div>
+                        <p class="text-xs text-gray-700">Force an immediate, unexpected Skill Check or remove 1 Player Momentum.</p>
+                    </div>
+
+                    <!-- Option 3: Shift Scene -->
+                    <div class="p-3 bg-pink-100 rounded-lg shadow-sm border border-pink-300">
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="font-bold text-pink-800">Shift Scene</h4>
+                            <span class="text-sm font-semibold text-pink-600 bg-pink-200 px-2 py-0.5 rounded-full">Cost: 3</span>
+                        </div>
+                        <p class="text-xs text-gray-700">Radically shift the environment to the PCs' disadvantage.</p>
+                    </div>
+                </div>
+                <!-- END: Tension Usage Options -->
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: Harm Status (Informational Table) -->
+    <section class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-red-500">
+        <h2 class="text-3xl font-bold text-red-700 mb-4 border-b pb-2">3. Harm Status (Damage Points)</h2>
+        <p class="text-gray-700 mb-4">Damage Points (DP) determine your current condition and the penalty applied to all Roll Checks.</p>
+        
+        <div class="overflow-x-auto custom-scroll">
+            <table class="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg overflow-hidden">
+                <thead class="bg-red-500 text-white">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-sm font-semibold uppercase tracking-wider">Damage Points (DP)</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold uppercase tracking-wider">Status</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold uppercase tracking-wider">Effect / Penalty</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200 text-gray-700">
+                    <!-- Healthy -->
+                    <tr class="bg-green-50">
+                        <td class="px-4 py-4 whitespace-nowrap font-mono text-lg font-bold text-green-700">0</td>
+                        <td class="px-4 py-4 whitespace-nowrap font-bold text-green-800">Healthy</td>
+                        <td class="px-4 py-4">No physical limitations. Penalty: <span class="text-xl font-extrabold text-green-800">0</span></td>
+                    </tr>
+                    <!-- Bruised -->
+                    <tr class="bg-yellow-50">
+                        <td class="px-4 py-4 whitespace-nowrap font-mono text-lg font-bold text-yellow-700">1–2</td>
+                        <td class="px-4 py-4 whitespace-nowrap font-semibold text-yellow-800">Bruised</td>
+                        <td class="px-4 py-4">Minor wounds, discomfort. Penalty: <span class="text-xl font-extrabold text-yellow-800">-1</span></td>
+                    </tr>
+                    <!-- Injured -->
+                    <tr class="bg-orange-50">
+                        <td class="px-4 py-4 whitespace-nowrap font-mono text-lg font-bold text-orange-700">3–4</td>
+                        <td class="px-4 py-4 whitespace-nowrap font-semibold text-orange-800">Injured</td>
+                        <td class="px-4 py-4">Significant pain. Can only take minor actions. Penalty: <span class="text-xl font-extrabold text-orange-800">-2</span></td>
+                    </tr>
+                    <!-- Broken -->
+                    <tr class="bg-red-50">
+                        <td class="px-4 py-4 whitespace-nowrap font-mono text-lg font-bold text-red-700">5+</td>
+                        <td class="px-4 py-4 whitespace-nowrap font-bold text-red-800">Broken</td>
+                        <td class="px-4 py-4">Incapacitated. Out of the fight. Penalty: <span class="text-xl font-extrabold text-red-800">X</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- SECTION 4: Thresholds Reference -->
+    <section class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-yellow-500">
+        <h2 class="text-3xl font-bold text-yellow-700 mb-4 border-b pb-2">4. Roll Outcomes Reference</h2>
+        
+        <div class="overflow-x-auto custom-scroll">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Result</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Roll</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Effect</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200 text-gray-700">
+                    <tr class="bg-green-50">
+                        <td class="px-4 py-4 whitespace-nowrap font-bold text-green-800">Critical Success</td>
+                        <td class="px-4 py-4 whitespace-nowrap font-mono text-green-600">15+</td>
+                        <td class="px-4 py-4">Spectacular success. Gain 2 points of Momentum.</td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-4 whitespace-nowrap font-semibold text-green-700">Full Success</td>
+                        <td class="px-4 py-4 whitespace-nowrap font-mono">11-14</td>
+                        <td class="px-4 py-4">Clean success. Gain 1 point of Momentum.</td>
+                    </tr>
+                    <tr class="bg-yellow-50">
+                        <td class="px-4 py-4 whitespace-nowrap font-semibold text-yellow-800">Mixed Success</td>
+                        <td class="px-4 py-4 whitespace-nowrap font-mono">7-10</td>
+                        <td class="px-4 py-4">Success with a cost. GM gains 1 point of Tension.</td>
+                    </tr>
+                    <tr class="bg-red-50">
+                        <td class="px-4 py-4 whitespace-nowrap font-bold text-red-800">Critical Failure</td>
+                        <td class="px-4 py-4 whitespace-nowrap font-mono text-red-600">6-</td>
+                        <td class="px-4 py-4">Disastrous failure. GM gains 2 points of Tension.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</div>
+
+<script>
+    // --- Chart Logic ---
+
+    let rollChart;
+
+    function createChart() {
+        const ctx = document.getElementById('rollChart').getContext('2d');
+        
+        // Probabilities for 3d6 roll (Sum of 3 to 18)
+        const labels = ['3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18'];
+        const counts = [1, 3, 6, 10, 15, 21, 25, 27, 27, 25, 21, 15, 10, 6, 3, 1]; // Number of combinations
+        const totalCombinations = 216; // 6 * 6 * 6
+
+        const probabilities = counts.map(c => (c / totalCombinations) * 100);
+
+        // Thresholds based on AAsS rules (assuming +0 modifier)
+        const backgroundColors = labels.map(label => {
+            const roll = parseInt(label);
+            if (roll >= 15) return 'rgba(16, 185, 129, 0.8)'; // Green (Critical)
+            if (roll >= 11) return 'rgba(59, 130, 246, 0.8)'; // Blue (Full)
+            if (roll >= 7) return 'rgba(251, 191, 36, 0.8)';  // Yellow (Mixed)
+            return 'rgba(239, 68, 68, 0.8)'; // Red (Failure)
+        });
+
+        // Destroy existing chart instance if it exists before creating a new one
+        if (rollChart) {
+            rollChart.destroy();
+        }
+
+        rollChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Probability of Result (3d6, +0 Mod)',
+                    data: probabilities,
+                    backgroundColor: backgroundColors,
+                    borderColor: backgroundColors.map(c => c.replace('0.8', '1')),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false,
+                    },
+                    title: {
+                        display: true,
+                        text: '3d6 Roll Probability Distribution',
+                        font: { size: 16 }
+                        
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Probability (%)'
+                        },
+                        max: 13, // Max probability is 12.5% for 10 or 11
+                        ticks: {
+                            stepSize: 2
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: '3d6 Roll Sum'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // --- Initialization ---
+
+    window.onload = function() {
+        createChart();
+    };
+</script>
+
+</body>
+</html>
