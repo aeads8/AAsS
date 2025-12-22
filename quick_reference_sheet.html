@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; background-color: #f7f7f7; }
         
         /* Chart Container Styling Constraints */
         .chart-container {
@@ -25,587 +25,359 @@
             max-height: 400px; /* Vertical constraint */
         }
 
-        /* Custom Range Slider */
-        input[type=range] {
+        /* Style to remove number arrows from input fields */
+        input[type=number] {
+            -moz-appearance: textfield; /* Firefox */
+        }
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
             -webkit-appearance: none;
-            width: 100%;
-            background: transparent;
+            margin: 0;
         }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 24px;
-            width: 24px;
-            border-radius: 50%;
-            background: #4F46E5;
-            cursor: pointer;
-            margin-top: -8px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+
+        /* Custom Scrollbar */
+        .custom-scroll::-webkit-scrollbar {
+            width: 8px;
         }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 8px;
-            cursor: pointer;
-            background: #E5E7EB;
-            border-radius: 99px;
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background-color: #9ca3af; /* Gray-400 */
+            border-radius: 4px;
         }
-        
-        .card-hover:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        .custom-scroll::-webkit-scrollbar-track {
+            background-color: #e5e7eb; /* Gray-200 */
         }
     </style>
-    <!-- Chosen Palette: Slate (Neutrals), Indigo (Primary/Player), Rose (Tension/Harm), Emerald (Success) -->
-    <!-- Application Structure Plan:
-         1. Header: Title and core concept.
-         2. Probability Lab: Interactive Chart.js section explaining the 3d6 curve. Users can slide a 'Modifier' to see how attributes affect success rates. This establishes the mathematical foundation.
-         3. Attributes: A 4-column grid detailing the core stats (Body, Dex, Wit, Soul).
-         4. Resource Economy: A split view (Player vs GM) detailing Momentum and Tension. Interactive toggles for spending costs.
-         5. Harm Simulator: An interactive slider allowing users to add Damage Points and see the status/penalty update in real-time.
-         6. Quick Reference Table: A synthesized view of roll outcomes.
-         WHY: This flow moves from the abstract (math) to the concrete (stats), then to the flow of play (resources), and finally consequences (harm).
-    -->
-    <!-- Visualization & Content Choices:
-         1. 3d6 Probability: Chart.js Bar Chart. Goal: Visualize the bell curve and "Critical" thresholds. Interaction: Modifier Slider.
-         2. Harm Track: HTML Range Input + Dynamic DOM manipulation. Goal: Show the "Death Spiral" effect of penalties.
-         3. Resource Cards: Grid layout with colored accents. Goal: Differentiate Player (Momentum) vs GM (Tension) tools.
-    -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="p-4 sm:p-8 bg-gray-100">
 
-    <!-- Header / Hero -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Andrew's Asynchronous System</h1>
-            <nav class="hidden md:flex space-x-8 text-sm font-medium text-slate-500">
-                <a href="#core-mechanic" class="hover:text-indigo-600 transition">Core Mechanic</a>
-                <a href="#attributes" class="hover:text-indigo-600 transition">Attributes</a>
-                <a href="#resources" class="hover:text-indigo-600 transition">Resources</a>
-                <a href="#harm" class="hover:text-indigo-600 transition">Harm</a>
-            </nav>
-        </div>
+<div class="max-w-4xl mx-auto space-y-8">
+    
+    <header class="text-center">
+        <h1 class="4xl sm:text-5xl font-extrabold text-gray-800 mb-2">Andrew's Asynchronous System (AAsS)</h1>
+        <p class="text-lg text-gray-600">Core Mechanics Guide</p>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
-
-        <!-- SECTION 1: CORE MECHANIC & PROBABILITY -->
-        <section id="core-mechanic" class="space-y-6">
-            <div class="max-w-3xl">
-                <h2 class="text-3xl font-bold text-slate-900">The Core Mechanic: 3d6 + Bonus</h2>
-                <p class="mt-4 text-lg text-slate-600 leading-relaxed">
-                    Andrew's Asynchronous System relies on a standard 3d6 bell curve.  Understanding the math is key to managing your resources.
-                </p>
-                <p class="mt-2 text-slate-600">
-                    <strong>Interactive Demo:</strong> Adjust the "Total Modifier" below to see how Attributes (+0 to +3) and Harm Penalties shift your probability of success.
-                </p>
-            </div>
-
-            <!-- Visualization: Probability Chart -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                <div class="flex flex-col md:flex-row gap-8 items-center">
-                    <!-- Controls -->
-                    <div class="w-full md:w-1/3 space-y-6 bg-slate-50 p-6 rounded-xl border border-slate-100">
-                        <div>
-                            <label for="modifierSlider" class="block text-sm font-bold text-slate-700 mb-2">Total Modifier: <span id="modValue" class="text-indigo-600">+0</span></label>
-                            <input type="range" id="modifierSlider" min="-5" max="8" value="0" step="1">
-                            <div class="flex justify-between text-xs text-slate-400 mt-1">
-                                <span>-5 (Debuffed)</span>
-                                <span>+0</span>
-                                <span>+8 (Maxed)</span>
-                            </div>
-                        </div>
-                        <div class="space-y-2 text-sm">
-                            <div class="flex justify-between">
-                                <span class="font-medium text-emerald-600">Critical Success (15+):</span>
-                                <span id="prob-crit" class="font-bold">9.3%</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="font-medium text-green-600">Full Success (11-14):</span>
-                                <span id="prob-full" class="font-bold">40.7%</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="font-medium text-amber-600">Mixed Success (7-10):</span>
-                                <span id="prob-mixed" class="font-bold">40.7%</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="font-medium text-rose-600">Crit Failure (6-):</span>
-                                <span id="prob-fail" class="font-bold">9.3%</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Chart -->
-                    <div class="w-full md:w-2/3">
-                        <div class="chart-container">
-                            <canvas id="probabilityChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- SECTION 2: ATTRIBUTES -->
-        <section id="attributes" class="space-y-6">
-            <div class="max-w-3xl">
-                <h2 class="text-3xl font-bold text-slate-900">Character Attributes</h2>
-                <p class="mt-4 text-lg text-slate-600">
-                    Characters are defined by four core attributes.  These bonuses are added directly to your 3d6 roll.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- Body -->
-                <div class="bg-white p-6 rounded-xl border-t-4 border-indigo-500 shadow-sm card-hover transition duration-300">
-                    <h3 class="text-xl font-bold text-slate-900 mb-2">Body</h3>
-                    <p class="text-slate-600 text-sm">Raw strength, endurance, carrying capacity, and brawling.</p>
-                    <div class="mt-4 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                        Physical
-                    </div>
-                </div>
-                <!-- Dexterity -->
-                <div class="bg-white p-6 rounded-xl border-t-4 border-cyan-500 shadow-sm card-hover transition duration-300">
-                    <h3 class="text-xl font-bold text-slate-900 mb-2">Dexterity</h3>
-                    <p class="text-slate-600 text-sm">Agility, stealth, dodging, lock-picking, and precise actions.</p>
-                    <div class="mt-4 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800">
-                        Finesse
-                    </div>
-                </div>
-                <!-- Wit -->
-                <div class="bg-white p-6 rounded-xl border-t-4 border-amber-500 shadow-sm card-hover transition duration-300">
-                    <h3 class="text-xl font-bold text-slate-900 mb-2">Wit</h3>
-                    <p class="text-slate-600 text-sm">Mental challenges, investigating, deceiving, analyzing, and planning.</p>
-                    <div class="mt-4 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                        Mental
-                    </div>
-                </div>
-                <!-- Soul -->
-                <div class="bg-white p-6 rounded-xl border-t-4 border-purple-500 shadow-sm card-hover transition duration-300">
-                    <h3 class="text-xl font-bold text-slate-900 mb-2">Soul</h3>
-                    <p class="text-slate-600 text-sm">Spiritual, social, and emotional challenges, persuasion, inspiration, and resisting fear.</p>
-                    <div class="mt-4 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                        Social
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- SECTION 3: RESOURCES (MOMENTUM vs TENSION) -->
-        <section id="resources" class="space-y-6">
-            <div class="max-w-3xl">
-                <h2 class="text-3xl font-bold text-slate-900">The Resource Economy</h2>
-                <p class="mt-4 text-lg text-slate-600">
-                    Players earn <strong>Momentum</strong> through success to perform heroic feats. The Game Master accrues <strong>Tension</strong> through player failures or certain choices.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Player: Momentum -->
-                <div class="bg-indigo-50 rounded-2xl p-8 border border-indigo-100">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-2xl font-extrabold text-indigo-900">Momentum</h3>
-                        <span class="px-3 py-1 bg-indigo-200 text-indigo-800 text-xs font-bold rounded-full uppercase">Player Resource</span>
-                    </div>
-                    
-                    <div class="space-y-6">
-                        <div>
-                            <h4 class="font-bold text-indigo-800 mb-2 uppercase text-xs tracking-wider">How to Gain</h4>
-                            <ul class="space-y-2 text-sm text-indigo-900">
-                                <li class="flex items-start"><span class="mr-2 text-indigo-500">●</span> <strong>Start of Game:</strong> Begin with 1 Momentum.</li>
-                                <li class="flex items-start"><span class="mr-2 text-indigo-500">●</span> <strong>Full Success (11-14):</strong> Gain +1 Momentum.</li>
-                                <li class="flex items-start"><span class="mr-2 text-indigo-500">●</span> <strong>Critical Success (15+):</strong> Gain +2 Momentum.</li>
-                            </ul>
-                        </div>
-
-                        <div>
-                            <h4 class="font-bold text-indigo-800 mb-2 uppercase text-xs tracking-wider">How to Spend</h4>
-                            <div class="grid gap-3">
-                                <div class="bg-white p-3 rounded-lg shadow-sm border border-indigo-100">
-                                    <div class="flex justify-between items-center mb-1">
-                                        <span class="font-bold text-indigo-700">Add Bonus</span>
-                                        <span class="text-xs font-bold bg-indigo-100 text-indigo-600 px-2 py-1 rounded">Cost: 1</span>
-                                    </div>
-                                    <p class="text-xs text-slate-600">Add +2 to any Skill Check <em>before</em> rolling.</p>
-                                </div>
-                                <div class="bg-white p-3 rounded-lg shadow-sm border border-indigo-100">
-                                    <div class="flex justify-between items-center mb-1">
-                                        <span class="font-bold text-indigo-700">Re-Roll</span>
-                                        <span class="text-xs font-bold bg-indigo-100 text-indigo-600 px-2 py-1 rounded">Cost: 2</span>
-                                    </div>
-                                    <p class="text-xs text-slate-600">Re-roll any result. You must accept the new result.</p>
-                                </div>
-                                <div class="bg-white p-3 rounded-lg shadow-sm border border-indigo-100">
-                                    <div class="flex justify-between items-center mb-1">
-                                        <span class="font-bold text-indigo-700">Declare Fact</span>
-                                        <span class="text-xs font-bold bg-indigo-100 text-indigo-600 px-2 py-1 rounded">Cost: 3</span>
-                                    </div>
-                                    <p class="text-xs text-slate-600">Define a minor, helpful fact about the scene.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- GM: Tension -->
-                <div class="bg-rose-50 rounded-2xl p-8 border border-rose-100">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-2xl font-extrabold text-rose-900">Tension</h3>
-                        <span class="px-3 py-1 bg-rose-200 text-rose-800 text-xs font-bold rounded-full uppercase">GM Resource</span>
-                    </div>
-                    
-                    <div class="space-y-6">
-                        <div>
-                            <h4 class="font-bold text-rose-800 mb-2 uppercase text-xs tracking-wider">How to Gain</h4>
-                            <ul class="space-y-2 text-sm text-rose-900">
-                                <li class="flex items-start"><span class="mr-2 text-rose-500">●</span> <strong>Start of Game:</strong> Begin with 0 Tension.</li>
-                                <li class="flex items-start"><span class="mr-2 text-rose-500">●</span> <strong>Mixed Success (7-10):</strong> GM gains +1 Tension.</li>
-                                <li class="flex items-start"><span class="mr-2 text-rose-500">●</span> <strong>Critical Failure (6-):</strong> GM gains +2 Tension.</li>
-                            </ul>
-                        </div>
-
-                        <div>
-                            <h4 class="font-bold text-rose-800 mb-2 uppercase text-xs tracking-wider">How to Spend (GM)</h4>
-                            <div class="grid gap-3">
-                                <div class="bg-white p-3 rounded-lg shadow-sm border border-rose-100">
-                                    <div class="flex justify-between items-center mb-1">
-                                        <span class="font-bold text-rose-700">Complication</span>
-                                        <span class="text-xs font-bold bg-rose-100 text-rose-600 px-2 py-1 rounded">Cost: 1</span>
-                                    </div>
-                                    <p class="text-xs text-slate-600">Introduce a minor enemy, small hazard, or degrade a Full Success to Mixed.</p>
-                                </div>
-                                <div class="bg-white p-3 rounded-lg shadow-sm border border-rose-100">
-                                    <div class="flex justify-between items-center mb-1">
-                                        <span class="font-bold text-rose-700">Escalate</span>
-                                        <span class="text-xs font-bold bg-rose-100 text-rose-600 px-2 py-1 rounded">Cost: 2</span>
-                                    </div>
-                                    <p class="text-xs text-slate-600">Force an immediate, unexpected Skill Check or remove 1 Player Momentum.</p>
-                                </div>
-                                <div class="bg-white p-3 rounded-lg shadow-sm border border-rose-100">
-                                    <div class="flex justify-between items-center mb-1">
-                                        <span class="font-bold text-rose-700">Shift Scene</span>
-                                        <span class="text-xs font-bold bg-rose-100 text-rose-600 px-2 py-1 rounded">Cost: 3</span>
-                                    </div>
-                                    <p class="text-xs text-slate-600">Radically shift the environment to the PCs' disadvantage.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- SECTION 4: HARM -->
-        <section id="harm" class="space-y-6">
-            <div class="max-w-3xl">
-                <h2 class="text-3xl font-bold text-slate-900">Harm & Damage</h2>
-                <p class="mt-4 text-lg text-slate-600">
-                    Characters have a limited capacity for damage. As <strong>Damage Points (DP)</strong> accumulate, penalties increase. Reaching 5 DP incapacitates a character.
-                </p>
-                <p class="mt-2 text-slate-600">
-                    <strong>Interact:</strong> Slide the bar below to simulate taking damage and see the mechanical penalties.
-                </p>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 max-w-4xl mx-auto">
-                <div class="mb-8">
-                    <div class="flex justify-between items-end mb-2">
-                        <label for="harmSlider" class="text-sm font-bold uppercase text-slate-500">Damage Points Accumulated</label>
-                        <span id="dpValue" class="text-4xl font-extrabold text-slate-900">0</span>
-                    </div>
-                    <input type="range" id="harmSlider" min="0" max="6" value="0" step="1">
-                    <div class="flex justify-between text-xs text-slate-400 mt-2 font-mono">
-                        <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6+</span>
-                    </div>
-                </div>
-
-                <div id="statusCard" class="bg-emerald-50 border-l-4 border-emerald-500 p-6 rounded-r-lg transition-colors duration-300">
-                    <div class="flex flex-col md:flex-row justify-between md:items-center">
-                        <div>
-                            <h3 id="statusTitle" class="text-2xl font-bold text-emerald-800">Healthy</h3>
-                            <p id="statusDesc" class="text-emerald-700 mt-1">You are fit and ready for action.</p>
-                        </div>
-                        <div class="mt-4 md:mt-0 text-right">
-                            <span class="block text-xs font-bold uppercase text-emerald-600 opacity-70">Penalty</span>
-                            <span id="statusPenalty" class="text-3xl font-mono font-bold text-emerald-800">0</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-slate-500">
-                    <div class="bg-slate-50 p-3 rounded">
-                        <strong>Rest:</strong> A full night's rest removes 1 DP.
-                    </div>
-                    <div class="bg-slate-50 p-3 rounded">
-                        <strong>Aid:</strong> Successful ally check (Diff 11+) removes 1 DP.
-                    </div>
-                    <div class="bg-slate-50 p-3 rounded">
-                        <strong>Stabilize:</strong> Broken characters need a Diff 15 medical check.
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Summary Table -->
-        <section class="border-t border-slate-200 pt-10">
-            <h2 class="text-xl font-bold text-slate-900 mb-6">Quick Reference: Outcomes</h2>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-200 bg-white rounded-lg shadow-sm border border-slate-200">
-                    <thead class="bg-slate-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Roll Total</th>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Outcome</th>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Narrative Effect</th>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Resource Change</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-200">
-                        <tr class="bg-emerald-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-emerald-900">15+</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-emerald-700">Critical Success</td>
-                            <td class="px-6 py-4 text-sm text-slate-600">Spectacular success.</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-emerald-700">+2 Momentum</td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-700">11-14</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-green-700">Full Success</td>
-                            <td class="px-6 py-4 text-sm text-slate-600">Complete and clean success.</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-700">+1 Momentum</td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-amber-700">7-10</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-amber-700">Mixed Success</td>
-                            <td class="px-6 py-4 text-sm text-slate-600">Success at a cost or complication.</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-rose-700">GM +1 Tension</td>
-                        </tr>
-                        <tr class="bg-rose-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-rose-900">6-</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-rose-700">Critical Failure</td>
-                            <td class="px-6 py-4 text-sm text-slate-600">Disastrous failure. Situation worsens.</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-rose-700">GM +2 Tension</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-    </main>
-
-    <footer class="bg-slate-900 text-slate-400 py-12 mt-20">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p>&copy; Andrew's Asynchronous System RPG System.</p>
-        </div>
-    </footer>
-
-    <script>
-        // --- 1. Probability Chart Logic ---
-        const ctx = document.getElementById('probabilityChart').getContext('2d');
-        const modifierSlider = document.getElementById('modifierSlider');
-        const modValueDisplay = document.getElementById('modValue');
+    <!-- SECTION 1: Roll Check Mechanic (3d6) -->
+    <section class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-indigo-500">
+        <h2 class="text-3xl font-bold text-indigo-700 mb-4 border-b pb-2">1. The Roll Check</h2>
+        <p class="text-gray-700 mb-4">The core mechanic is based on a 3d6 roll, aiming for higher results. The formula is: <code class="bg-gray-200 p-1 rounded font-mono font-bold">3d6 + Total Modifier</code>.</p>
         
-        // Probability displays
-        const dispCrit = document.getElementById('prob-crit');
-        const dispFull = document.getElementById('prob-full');
-        const dispMixed = document.getElementById('prob-mixed');
-        const dispFail = document.getElementById('prob-fail');
-
-        // 3d6 Frequency Map (Sum -> Count)
-        const frequency = {
-            3: 1, 4: 3, 5: 6, 6: 10, 7: 15, 8: 21, 9: 25, 10: 27,
-            11: 27, 12: 25, 13: 21, 14: 15, 15: 10, 16: 6, 17: 3, 18: 1
-        };
-        const totalCombinations = 216;
-
-        function calculateProbabilities(modifier) {
-            let counts = { fail: 0, mixed: 0, full: 0, crit: 0 };
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             
-            for (let roll = 3; roll <= 18; roll++) {
-                let result = roll + modifier;
-                let count = frequency[roll];
+            <!-- Total Modifier (Horizontal Math Problem Style) -->
+            <div class="p-4 bg-gray-50 rounded-lg flex flex-col justify-center items-center">
+                <p class="text-sm font-semibold text-gray-600 mb-2">Total Modifier Calculation:</p>
+                <div class="bg-white p-4 rounded-lg shadow-md w-full max-w-xs text-center">
+                    <div class="text-lg font-mono font-bold text-gray-700 leading-tight">
+                        <!-- Attribute Bonus (Neutral Color) -->
+                        <span>Attribute Bonus</span>
+                        <!-- Plus Sign (Neutral Color) -->
+                        <span class="text-gray-500 mx-1"> + </span>
+                        <!-- Temporary Bonus (Neutral Color) -->
+                        <span>Temporary Bonus</span>
+                        <!-- Plus Sign (Neutral Color) -->
+                        <span class="text-gray-500 mx-1"> + </span>
+                        <!-- Harm Penalty (Neutral Color) -->
+                        <span>Harm Penalty</span>
+                    </div>
+                    <!-- The dividing line -->
+                    <hr class="my-2 border-t-2 border-gray-400 w-3/4 mx-auto">
+                    <p class="text-2xl font-extrabold text-gray-800">
+                        Total Modifier
+                    </p>
+                </div>
+            </div>
+            <!-- End: Total Modifier (Horizontal Math Problem Style) -->
+            
+            <!-- Thresholds -->
+            <div class="p-4 bg-indigo-50 rounded-lg">
+                <p class="text-sm font-semibold text-indigo-700 mb-1">Thresholds (Target Number)</p>
+                <ul class="list-disc list-inside space-y-1 pl-4">
+                    <li class="font-bold text-gray-800">
+                        <span class="text-green-600">Critical Success:</span> 15+
+                    </li>
+                    <li class="font-bold text-gray-800">
+                        <span class="text-blue-600">Full Success:</span> 11-14
+                    </li>
+                    <li class="font-bold text-gray-800">
+                        <span class="text-yellow-600">Mixed Success:</span> 7-10
+                    </li>
+                    <li class="font-bold text-gray-800">
+                        <span class="text-red-600">Critical Failure:</span> 6-
+                    </li>
+                </ul>
+            </div>
+            <!-- End: Thresholds -->
+        </div>
+
+        <div class="chart-container mt-6">
+            <canvas id="rollChart"></canvas>
+        </div>
+    </section>
+
+    <!-- SECTION 2: Momentum & Tension (Static Informational Section) -->
+    <section class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-teal-500">
+        <h2 class="text-3xl font-bold text-teal-700 mb-4 border-b pb-2">2. Momentum & Tension</h2>
+        <p class="text-gray-700 mb-4">These two resources track the narrative flow and difficulty of the game. Momentum is the player resource, and Tension is the Game Master (GM) resource.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Momentum Card -->
+            <div class="p-4 bg-teal-50 rounded-lg shadow-inner border-l-4 border-teal-600">
+                <h3 class="text-xl font-bold text-teal-800 mb-2">Momentum (Player)</h3>
+                <p class="text-sm text-gray-700 mb-3">
+                    Momentum is a reward for players given for successful checks. Momentum may be spent by players.
+                </p>
+                <ul class="list-disc list-inside text-sm space-y-1 text-gray-600">
+                    <li>Gained on Full Success (+1) and Critical Success (+2).</li>
+                    <li>Spent by the players to assist on rolls or with the scene.</li>
+                </ul>
                 
-                if (result <= 6) counts.fail += count;
-                else if (result <= 10) counts.mixed += count;
-                else if (result <= 14) counts.full += count;
-                else counts.crit += count;
-            }
-            return counts;
+                <!-- START: Momentum Usage Options -->
+                <div class="mt-4 space-y-3">
+                    <!-- Option 1: Add Bonus -->
+                    <div class="p-3 bg-teal-100 rounded-lg shadow-sm border border-teal-300">
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="font-bold text-teal-800">Add Bonus</h4>
+                            <span class="text-sm font-semibold text-teal-600 bg-teal-200 px-2 py-0.5 rounded-full">Cost: 1</span>
+                        </div>
+                        <p class="text-xs text-gray-700">Add +2 to any Skill Check before rolling.</p>
+                    </div>
+
+                    <!-- Option 2: Re-Roll -->
+                    <div class="p-3 bg-teal-100 rounded-lg shadow-sm border border-teal-300">
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="font-bold text-teal-800">Re-Roll</h4>
+                            <span class="text-sm font-semibold text-teal-600 bg-teal-200 px-2 py-0.5 rounded-full">Cost: 2</span>
+                        </div>
+                        <p class="text-xs text-gray-700">Re-roll any result. You must accept the new result.</p>
+                    </div>
+
+                    <!-- Option 3: Declare Fact -->
+                    <div class="p-3 bg-teal-100 rounded-lg shadow-sm border border-teal-300">
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="font-bold text-teal-800">Declare Fact</h4>
+                            <span class="text-sm font-semibold text-teal-600 bg-teal-200 px-2 py-0.5 rounded-full">Cost: 3</span>
+                        </div>
+                        <p class="text-xs text-gray-700">Define a minor, helpful fact about the scene.</p>
+                    </div>
+                </div>
+                <!-- END: Momentum Usage Options -->
+            </div>
+
+            <!-- Tension Card -->
+            <div class="p-4 bg-pink-50 rounded-lg shadow-inner border-l-4 border-pink-600">
+                <h3 class="text-xl font-bold text-pink-800 mb-2">Tension (GM)</h3>
+                <p class="text-sm text-gray-700 mb-3">
+                    Tension is a resource given to the GM when the player fails checks. Tension may be spent by the GM.
+                </p>
+                <ul class="list-disc list-inside text-sm space-y-1 text-gray-600">
+                    <li>Gained on Mixed Success (+1) and Critical Failure (+2).</li>
+                    <li>Spent by the GM to introduce complications, trigger enemy actions, or reinforce threats.</li>
+                </ul>
+
+                <!-- START: Tension Usage Options -->
+                <div class="mt-4 space-y-3">
+                    <!-- Option 1: Complication -->
+                    <div class="p-3 bg-pink-100 rounded-lg shadow-sm border border-pink-300">
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="font-bold text-pink-800">Complication</h4>
+                            <span class="text-sm font-semibold text-pink-600 bg-pink-200 px-2 py-0.5 rounded-full">Cost: 1</span>
+                        </div>
+                        <p class="text-xs text-gray-700">Introduce a minor enemy, small hazard, or degrade a Full Success to Mixed.</p>
+                    </div>
+
+                    <!-- Option 2: Escalate -->
+                    <div class="p-3 bg-pink-100 rounded-lg shadow-sm border border-pink-300">
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="font-bold text-pink-800">Escalate</h4>
+                            <span class="text-sm font-semibold text-pink-600 bg-pink-200 px-2 py-0.5 rounded-full">Cost: 2</span>
+                        </div>
+                        <p class="text-xs text-gray-700">Force an immediate, unexpected Skill Check or remove 1 Player Momentum.</p>
+                    </div>
+
+                    <!-- Option 3: Shift Scene -->
+                    <div class="p-3 bg-pink-100 rounded-lg shadow-sm border border-pink-300">
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="font-bold text-pink-800">Shift Scene</h4>
+                            <span class="text-sm font-semibold text-pink-600 bg-pink-200 px-2 py-0.5 rounded-full">Cost: 3</span>
+                        </div>
+                        <p class="text-xs text-gray-700">Radically shift the environment to the PCs' disadvantage.</p>
+                    </div>
+                </div>
+                <!-- END: Tension Usage Options -->
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: Harm Status (Damage Points) -->
+    <section class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-red-500">
+        <h2 class="text-3xl font-bold text-red-700 mb-4 border-b pb-2">3. Harm Status (Damage Points)</h2>
+        <p class="text-gray-700 mb-4">Damage Points (DP) determine your current condition and the penalty applied to all Roll Checks.</p>
+        
+        <div class="overflow-x-auto custom-scroll">
+            <table class="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg overflow-hidden">
+                <thead class="bg-red-500 text-white">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-sm font-semibold uppercase tracking-wider">Damage Points (DP)</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold uppercase tracking-wider">Status</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold uppercase tracking-wider">Effect / Penalty</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200 text-gray-700">
+                    <!-- Healthy -->
+                    <tr class="bg-green-50">
+                        <td class="px-4 py-4 whitespace-nowrap font-mono text-lg font-bold text-green-700">0</td>
+                        <td class="px-4 py-4 whitespace-nowrap font-bold text-green-800">Healthy</td>
+                        <td class="px-4 py-4">No physical limitations. Penalty: <span class="text-xl font-extrabold text-green-800">0</span></td>
+                    </tr>
+                    <!-- Bruised -->
+                    <tr class="bg-yellow-50">
+                        <td class="px-4 py-4 whitespace-nowrap font-mono text-lg font-bold text-yellow-700">1–2</td>
+                        <td class="px-4 py-4 whitespace-nowrap font-semibold text-yellow-800">Bruised</td>
+                        <td class="px-4 py-4">Minor wounds, discomfort. Penalty: <span class="text-xl font-extrabold text-yellow-800">-1</span></td>
+                    </tr>
+                    <!-- Injured -->
+                    <tr class="bg-orange-50">
+                        <td class="px-4 py-4 whitespace-nowrap font-mono text-lg font-bold text-orange-700">3–4</td>
+                        <td class="px-4 py-4 whitespace-nowrap font-semibold text-orange-800">Injured</td>
+                        <td class="px-4 py-4">Significant pain. Can only take minor actions. Penalty: <span class="text-xl font-extrabold text-orange-800">-2</span></td>
+                    </tr>
+                    <!-- Broken -->
+                    <tr class="bg-red-50">
+                        <td class="px-4 py-4 whitespace-nowrap font-mono text-lg font-bold text-red-700">5+</td>
+                        <td class="px-4 py-4 whitespace-nowrap font-bold text-red-800">Broken</td>
+                        <td class="px-4 py-4">Incapacitated. Out of the fight. Penalty: <span class="text-xl font-extrabold text-red-800">Cannot make checks at all</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- SECTION 4: Thresholds Reference -->
+    <section class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-yellow-500">
+        <h2 class="text-3xl font-bold text-yellow-700 mb-4 border-b pb-2">4. Roll Outcomes Reference</h2>
+        
+        <div class="overflow-x-auto custom-scroll">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Result</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Roll</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Effect</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200 text-gray-700">
+                    <tr class="bg-green-50">
+                        <td class="px-4 py-4 whitespace-nowrap font-bold text-green-800">Critical Success</td>
+                        <td class="px-4 py-4 whitespace-nowrap font-mono text-green-600">15+</td>
+                        <td class="px-4 py-4">Spectacular success. Gain 2 points of Momentum.</td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-4 whitespace-nowrap font-semibold text-green-700">Full Success</td>
+                        <td class="px-4 py-4 whitespace-nowrap font-mono">11-14</td>
+                        <td class="px-4 py-4">Clean success. Gain 1 point of Momentum.</td>
+                    </tr>
+                    <tr class="bg-yellow-50">
+                        <td class="px-4 py-4 whitespace-nowrap font-semibold text-yellow-800">Mixed Success</td>
+                        <td class="px-4 py-4 whitespace-nowrap font-mono">7-10</td>
+                        <td class="px-4 py-4">Success with a cost. GM gains 1 point of Tension.</td>
+                    </tr>
+                    <tr class="bg-red-50">
+                        <td class="px-4 py-4 whitespace-nowrap font-bold text-red-800">Critical Failure</td>
+                        <td class="px-4 py-4 whitespace-nowrap font-mono text-red-600">6-</td>
+                        <td class="px-4 py-4">Disastrous failure. GM gains 2 points of Tension.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</div>
+
+<script>
+    // --- Chart Logic ---
+
+    let rollChart;
+
+    function createChart() {
+        const ctx = document.getElementById('rollChart').getContext('2d');
+        
+        // Probabilities for 3d6 roll (Sum of 3 to 18)
+        const labels = ['3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18'];
+        const counts = [1, 3, 6, 10, 15, 21, 25, 27, 27, 25, 21, 15, 10, 6, 3, 1]; // Number of combinations
+        const totalCombinations = 216; // 6 * 6 * 6
+
+        const probabilities = counts.map(c => (c / totalCombinations) * 100);
+
+        // Thresholds based on AAsS rules (assuming +0 modifier)
+        const backgroundColors = labels.map(label => {
+            const roll = parseInt(label);
+            if (roll >= 15) return 'rgba(16, 185, 129, 0.8)'; // Green (Critical)
+            if (roll >= 11) return 'rgba(59, 130, 246, 0.8)'; // Blue (Full)
+            if (roll >= 7) return 'rgba(251, 191, 36, 0.8)';  // Yellow (Mixed)
+            return 'rgba(239, 68, 68, 0.8)'; // Red (Failure)
+        });
+
+        // Destroy existing chart instance if it exists if it exists before creating a new one
+        if (rollChart) {
+            rollChart.destroy();
         }
 
-        function updateChart(modifier) {
-            const counts = calculateProbabilities(modifier);
-            
-            // Update Text Displays
-            dispFail.textContent = ((counts.fail / totalCombinations) * 100).toFixed(1) + "%";
-            dispMixed.textContent = ((counts.mixed / totalCombinations) * 100).toFixed(1) + "%";
-            dispFull.textContent = ((counts.full / totalCombinations) * 100).toFixed(1) + "%";
-            dispCrit.textContent = ((counts.crit / totalCombinations) * 100).toFixed(1) + "%";
-
-            // Update Chart Data
-            chart.data.datasets[0].data = [
-                (counts.fail / totalCombinations) * 100,
-                (counts.mixed / totalCombinations) * 100,
-                (counts.full / totalCombinations) * 100,
-                (counts.crit / totalCombinations) * 100
-            ];
-            chart.update();
-        }
-
-        const chart = new Chart(ctx, {
+        rollChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['Crit Fail (6-)', 'Mixed (7-10)', 'Full (11-14)', 'Crit Success (15+)'],
+                labels: labels,
                 datasets: [{
-                    label: 'Probability %',
-                    data: [0,0,0,0], // Initial dummy data, updated immediately
-                    backgroundColor: [
-                        'rgba(225, 29, 72, 0.7)',  // Rose-600
-                        'rgba(217, 119, 6, 0.7)',  // Amber-600
-                        'rgba(22, 163, 74, 0.7)',  // Green-600
-                        'rgba(16, 185, 129, 0.7)'  // Emerald-500
-                    ],
-                    borderRadius: 6,
-                    borderWidth: 0
+                    label: 'Probability of Result (3d6, +0 Mod)',
+                    data: probabilities,
+                    backgroundColor: backgroundColors,
+                    borderColor: backgroundColors.map(c => c.replace('0.8', '1')),
+                    borderWidth: 1
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.parsed.y.toFixed(1) + '%';
-                            }
-                        }
+                    legend: {
+                        display: false,
+                    },
+                    title: {
+                        display: true,
+                        text: '3d6 Roll Probability Distribution',
+                        font: { size: 16 }
+                        
                     }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        max: 100,
-                        ticks: { callback: (val) => val + '%' },
-                        grid: { display: true, color: '#f1f5f9' }
+                        title: {
+                            display: true,
+                            text: 'Probability (%)'
+                        },
+                        max: 13, // Max probability is 12.5% for 10 or 11
+                        ticks: {
+                            stepSize: 2
+                        }
                     },
                     x: {
-                        grid: { display: false }
+                        title: {
+                            display: true,
+                            text: '3d6 Roll Sum'
+                        }
                     }
                 }
             }
         });
+    }
 
-        // Init Chart
-        updateChart(0);
+    // --- Initialization ---
 
-        // Event Listener for Modifier Slider
-        modifierSlider.addEventListener('input', (e) => {
-            const val = parseInt(e.target.value);
-            const sign = val >= 0 ? '+' : '';
-            modValueDisplay.innerText = `${sign}${val}`;
-            updateChart(val);
-        });
+    window.onload = function() {
+        createChart();
+    };
+</script>
 
-
-        // --- 2. Harm Slider Logic ---
-        const harmSlider = document.getElementById('harmSlider');
-        const dpValue = document.getElementById('dpValue');
-        const statusCard = document.getElementById('statusCard');
-        const statusTitle = document.getElementById('statusTitle');
-        const statusDesc = document.getElementById('statusDesc');
-        const statusPenalty = document.getElementById('statusPenalty');
-
-        // Definitions for states
-        const harmStates = [
-            { // 0
-                title: "Healthy", 
-                desc: "No penalties. You are fit and ready.", 
-                penalty: "0", 
-                colorClass: "emerald", 
-                borderColor: "border-emerald-500", 
-                bgColor: "bg-emerald-50",
-                textTitle: "text-emerald-800",
-                textDesc: "text-emerald-700",
-                textPen: "text-emerald-800"
-            },
-            { // 1
-                title: "Bruised (Minor)", 
-                desc: "Minor scrapes and winded.", 
-                penalty: "-1", 
-                colorClass: "amber", 
-                borderColor: "border-amber-500", 
-                bgColor: "bg-amber-50",
-                textTitle: "text-amber-800",
-                textDesc: "text-amber-700",
-                textPen: "text-amber-800"
-            },
-            { // 2
-                title: "Bruised (Minor)", 
-                desc: "Minor scrapes and winded.", 
-                penalty: "-1", 
-                colorClass: "amber", 
-                borderColor: "border-amber-500", 
-                bgColor: "bg-amber-50",
-                textTitle: "text-amber-800",
-                textDesc: "text-amber-700",
-                textPen: "text-amber-800"
-            },
-            { // 3
-                title: "Injured (Moderate)", 
-                desc: "Serious wounds or deep fatigue.", 
-                penalty: "-2", 
-                colorClass: "orange", 
-                borderColor: "border-orange-500", 
-                bgColor: "bg-orange-50",
-                textTitle: "text-orange-800",
-                textDesc: "text-orange-700",
-                textPen: "text-orange-800"
-            },
-            { // 4
-                title: "Injured (Moderate)", 
-                desc: "Serious wounds or deep fatigue.", 
-                penalty: "-2", 
-                colorClass: "orange", 
-                borderColor: "border-orange-500", 
-                bgColor: "bg-orange-50",
-                textTitle: "text-orange-800",
-                textDesc: "text-orange-700",
-                textPen: "text-orange-800"
-            },
-            { // 5
-                title: "Broken (Critical)", 
-                desc: "Incapacitated. Out of the fight.", 
-                penalty: "X", 
-                colorClass: "slate", 
-                borderColor: "border-slate-600", 
-                bgColor: "bg-slate-200",
-                textTitle: "text-slate-800",
-                textDesc: "text-slate-700",
-                textPen: "text-slate-900"
-            }
-        ];
-
-        harmSlider.addEventListener('input', (e) => {
-            const val = parseInt(e.target.value);
-            dpValue.innerText = val >= 5 ? "5+" : val;
-            
-            // Determine state index (0=0, 1-2=Bruised, 3-4=Injured, 5+=Broken)
-            let state;
-            if (val === 0) state = harmStates[0];
-            else if (val <= 2) state = harmStates[1]; // Handles 1, 2
-            else if (val <= 4) state = harmStates[3]; // Handles 3, 4
-            else state = harmStates[5]; // Handles 5, 6+
-
-            // Update DOM
-            statusTitle.innerText = state.title;
-            statusDesc.innerText = state.desc;
-            statusPenalty.innerText = state.penalty;
-
-            // Reset classes
-            statusCard.className = `p-6 rounded-r-lg border-l-4 transition-colors duration-300 ${state.bgColor} ${state.borderColor}`;
-            
-            statusTitle.className = `text-2xl font-bold ${state.textTitle}`;
-            statusDesc.className = `mt-1 ${state.textDesc}`;
-            statusPenalty.className = `text-3xl font-mono font-bold ${state.textPen}`;
-        });
-
-    </script>
 </body>
 </html>
