@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Andrew's Asynchronous System (AAsS) Character Sheet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117;
+        }
+        .container {
+            max-width: 550px;
+        }
+        .attr-input {
+            appearance: textfield;
+            -webkit-appearance: none;
+            margin: 0;
+            text-align: center;
+        }
+        .attr-input::-webkit-outer-spin-button,
+        .attr-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+</head>
+<body class="p-4 flex items-center justify-center min-h-screen">
+
+<div class="container bg-gray-800 p-6 sm:p-8 rounded-xl shadow-2xl w-full border border-gray-700">
+    
+    <h1 class="text-3xl font-bold text-indigo-400 mb-6 text-center">AAsS Character Sheet</h1>
+
+    <!-- Character Information -->
+    <div class="mb-6 bg-gray-700 p-4 rounded-lg border border-gray-600">
+        <div class="space-y-3">
+            <div class="flex items-center justify-between gap-4">
+                <label for="charName" class="text-gray-300 font-medium w-1/4">Name:</label>
+                <input type="text" id="charName" class="w-3/4 px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white focus:ring-indigo-500" oninput="saveCharInfo()">
+            </div>
+            <div class="flex items-center justify-between gap-4">
+                <label for="charLevel" class="text-gray-300 font-medium w-1/4">Level:</label>
+                <input type="number" id="charLevel" value="1" class="w-3/4 px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white text-center" oninput="saveCharInfo()">
+            </div>
+        </div>
+    </div>
+
+    <!-- Momentum & Harm -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <div class="bg-gray-700 p-4 rounded-lg border border-gray-600">
+            <h2 class="text-lg font-semibold text-gray-200 mb-2">Momentum</h2>
+            <input type="number" id="momentumPoints" value="0" min="-5" max="5" class="attr-input w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-xl text-white" oninput="saveMomentum()">
+        </div>
+        <div class="bg-gray-700 p-4 rounded-lg border border-gray-600">
+            <h2 class="text-lg font-semibold text-gray-200 mb-2">Harm (DP)</h2>
+            <input type="number" id="damagePoints" value="0" min="0" class="attr-input w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-xl text-white" oninput="handleDamagePointsChange()">
+            <p id="conditionText" class="text-center text-xs mt-2 font-bold uppercase tracking-wider">Healthy</p>
+        </div>
+    </div>
+
+    <!-- Abilities -->
+    <div class="mb-6 bg-gray-700 p-4 rounded-lg border border-gray-600">
+        <h2 class="text-xl font-semibold text-gray-200 mb-3">Abilities</h2>
+        <div id="attributeInputs" class="space-y-2"></div>
+        <div class="pt-4 mt-4 border-t border-gray-600">
+            <label class="block text-xs font-medium text-gray-400 mb-1 uppercase">Global Temporary Bonus/Penalty:</label>
+            <input type="number" id="tempBonus" value="0" min="-5" max="5" class="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded-lg text-white text-center font-bold">
+        </div>
+    </div>
+
+    <!-- Active Items (New Section) -->
+    <div class="mb-6 bg-gray-700 p-4 rounded-lg border border-gray-600">
+        <div class="flex justify-between items-center mb-3">
+            <h2 class="text-xl font-semibold text-gray-200">Active Items</h2>
+            <button onclick="addItemRow()" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1 rounded">+ Add Item</button>
+        </div>
+        <div id="activeItemsContainer" class="space-y-3">
+            <!-- Item rows will be injected here -->
+        </div>
+    </div>
+    
+    <!-- Results Display -->
+    <div id="results" class="mb-6 p-5 bg-gray-900 rounded-xl border-2 border-indigo-500 hidden">
+        <div class="text-center mb-2">
+            <span id="checkAttributeName" class="text-indigo-400 font-extrabold text-lg uppercase"></span>
+        </div>
+        <div class="flex justify-around items-center mb-4">
+            <div class="text-center">
+                <p class="text-[10px] text-gray-500 uppercase">Mod</p>
+                <div id="totalBonusDisplay" class="text-lg font-bold text-indigo-300"></div>
+            </div>
+            <div class="text-center">
+                <div id="finalTotal" class="text-5xl font-black text-white"></div>
+            </div>
+            <div class="text-center">
+                <p class="text-[10px] text-gray-500 uppercase">Dice</p>
+                <div id="diceValues" class="text-lg font-mono text-yellow-400 font-bold"></div>
+            </div>
+        </div>
+        <div id="outcomeText" class="text-xl font-bold rounded-lg px-2 py-1 text-center"></div>
+        <p id="outcomeEffect" class="text-xs text-gray-400 mt-2 text-center italic"></p>
+    </div>
+
+    <!-- Notes & Equipment -->
+    <div class="space-y-4">
+        <div class="bg-gray-700 p-4 rounded-lg border border-gray-600">
+            <h2 class="text-lg font-semibold text-gray-200 mb-2">General Equipment</h2>
+            <textarea id="equipmentArea" rows="2" class="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-sm text-white" oninput="saveEquipment()"></textarea>
+        </div>
+        <div class="bg-gray-700 p-4 rounded-lg border border-gray-600">
+            <h2 class="text-lg font-semibold text-gray-200 mb-2">Notes</h2>
+            <textarea id="notesArea" rows="2" class="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-sm text-white" oninput="saveNotes()"></textarea>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ATTRIBUTES = ['Strength', 'Dexterity', 'Wit', 'Soul'];
+    const STORAGE_PREFIX = 'AASS_v2_';
+
+    // State Management
+    function saveData(key, val) { localStorage.setItem(STORAGE_PREFIX + key, typeof val === 'string' ? val : JSON.stringify(val)); }
+    function getData(key, fallback) { 
+        const v = localStorage.getItem(STORAGE_PREFIX + key);
+        if (v === null) return fallback;
+        try { return JSON.parse(v); } catch(e) { return v; }
+    }
+
+    function saveCharInfo() {
+        saveData('name', document.getElementById('charName').value);
+        saveData('level', document.getElementById('charLevel').value);
+    }
+    function saveNotes() { saveData('notes', document.getElementById('notesArea').value); }
+    function saveEquipment() { saveData('equipment', document.getElementById('equipmentArea').value); }
+    function saveMomentum() { saveData('momentum', document.getElementById('momentumPoints').value); }
+
+    function calculateHarmStatus(dp) {
+        if (dp >= 6) return { status: 'Broken', penalty: -99, color: 'text-red-500' };
+        if (dp >= 4) return { status: 'Injured', penalty: -2, color: 'text-red-400' };
+        if (dp >= 2) return { status: 'Bruised', penalty: -1, color: 'text-orange-400' };
+        return { status: 'Healthy', penalty: 0, color: 'text-green-400' };
+    }
+
+    function handleDamagePointsChange() {
+        const dp = parseInt(document.getElementById('damagePoints').value) || 0;
+        const { status, penalty, color } = calculateHarmStatus(dp);
+        const el = document.getElementById('conditionText');
+        el.textContent = status + (penalty !== -99 && penalty !== 0 ? ` (${penalty})` : '');
+        el.className = `text-center text-xs mt-2 font-bold uppercase tracking-wider ${color}`;
+        
+        document.querySelectorAll('.roll-btn').forEach(btn => {
+            btn.disabled = (penalty === -99);
+            btn.style.opacity = (penalty === -99) ? '0.5' : '1';
+        });
+        saveData('dp', dp);
+    }
+
+    function setupAttributeInputs() {
+        const container = document.getElementById('attributeInputs');
+        const stored = getData('bonuses', {});
+        ATTRIBUTES.forEach(attr => {
+            const div = document.createElement('div');
+            div.className = 'flex items-center gap-2';
+            div.innerHTML = `
+                <span class="text-gray-300 text-xs font-bold w-20 uppercase">${attr}</span>
+                <input type="number" id="${attr}Bonus" value="${stored[attr] || 0}" min="0" max="3" 
+                       class="attr-input w-12 px-2 py-1 bg-gray-600 border border-gray-500 rounded text-white font-bold" 
+                       onchange="saveBonuses()">
+                <button onclick="rollCheck('${attr}')" class="roll-btn flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-1 rounded shadow-lg transition text-sm">Roll</button>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function saveBonuses() {
+        const bonuses = {};
+        ATTRIBUTES.forEach(attr => bonuses[attr] = parseInt(document.getElementById(`${attr}Bonus`).value) || 0);
+        saveData('bonuses', bonuses);
+    }
+
+    // Active Items Logic
+    function addItemRow(data = { name: '', mod: 0, attr: 'Strength' }) {
+        const id = Date.now() + Math.random();
+        const container = document.getElementById('activeItemsContainer');
+        const div = document.createElement('div');
+        div.className = 'flex items-center gap-2 bg-gray-800 p-2 rounded-lg border border-gray-600 item-row';
+        div.dataset.id = id;
+        
+        let attrOptions = ATTRIBUTES.map(a => `<option value="${a}" ${data.attr === a ? 'selected' : ''}>${a.substring(0,3)}</option>`).join('');
+        let modOptions = '';
+        for(let i=5; i>=-5; i--) modOptions += `<option value="${i}" ${data.mod == i ? 'selected' : ''}>${i > 0 ? '+' : ''}${i}</option>`;
+
+        div.innerHTML = `
+            <input type="text" placeholder="Item Name" value="${data.name}" class="item-name flex-1 bg-gray-700 border border-gray-500 rounded px-2 py-1 text-white text-sm" oninput="saveItems()">
+            <select class="item-mod bg-gray-700 border border-gray-500 rounded px-1 py-1 text-white text-xs" onchange="saveItems()">
+                ${modOptions}
+            </select>
+            <select class="item-attr bg-gray-700 border border-gray-500 rounded px-1 py-1 text-white text-xs uppercase" onchange="saveItems()">
+                ${attrOptions}
+            </select>
+            <button onclick="rollItem('${id}')" class="roll-btn bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1 rounded text-xs">Roll</button>
+            <button onclick="this.parentElement.remove(); saveItems();" class="text-gray-500 hover:text-red-400 px-1 font-bold">×</button>
+        `;
+        container.appendChild(div);
+    }
+
+    function saveItems() {
+        const items = [];
+        document.querySelectorAll('.item-row').forEach(row => {
+            items.push({
+                name: row.querySelector('.item-name').value,
+                mod: parseInt(row.querySelector('.item-mod').value),
+                attr: row.querySelector('.item-attr').value
+            });
+        });
+        saveData('active_items', items);
+    }
+
+    function rollItem(id) {
+        const row = document.querySelector(`[data-id="${id}"]`);
+        const itemName = row.querySelector('.item-name').value || "Item";
+        const itemMod = parseInt(row.querySelector('.item-mod').value);
+        const selectedAttr = row.querySelector('.item-attr').value;
+        
+        rollCheck(selectedAttr, itemMod, itemName);
+    }
+
+    function rollCheck(attr, itemMod = 0, labelOverride = null) {
+        const dp = parseInt(document.getElementById('damagePoints').value) || 0;
+        const { penalty: harmPenalty } = calculateHarmStatus(dp);
+        if (harmPenalty <= -99) return;
+
+        const attrBonus = parseInt(document.getElementById(`${attr}Bonus`).value) || 0;
+        const tempBonus = parseInt(document.getElementById('tempBonus').value) || 0;
+        const totalMod = attrBonus + tempBonus + harmPenalty + itemMod;
+
+        const dice = [Math.ceil(Math.random()*6), Math.ceil(Math.random()*6), Math.ceil(Math.random()*6)];
+        const sum = dice.reduce((a,b) => a+b, 0);
+        const final = sum + totalMod;
+
+        let res = { text: 'Critical Failure', color: 'bg-red-700 text-white', effect: 'GM gains 2 Tension.' };
+        if (final >= 15) res = { text: 'Critical Success', color: 'bg-green-700 text-white', effect: 'Gain 2 Momentum.' };
+        else if (final >= 11) res = { text: 'Full Success', color: 'bg-green-500 text-gray-900', effect: 'Gain 1 Momentum.' };
+        else if (final >= 7) res = { text: 'Mixed Success', color: 'bg-yellow-500 text-gray-900', effect: 'GM gains 1 Tension.' };
+
+        document.getElementById('checkAttributeName').textContent = labelOverride ? `${labelOverride} (${attr})` : `${attr} Check`;
+        document.getElementById('totalBonusDisplay').textContent = (totalMod >= 0 ? '+' : '') + totalMod;
+        document.getElementById('diceValues').textContent = dice.join('+');
+        document.getElementById('finalTotal').textContent = final;
+        
+        const outcomeEl = document.getElementById('outcomeText');
+        outcomeEl.textContent = res.text;
+        outcomeEl.className = `text-xl font-bold rounded-lg px-2 py-1 mt-1 text-center ${res.color}`;
+        document.getElementById('outcomeEffect').textContent = res.effect;
+        document.getElementById('results').classList.remove('hidden');
+
+        // Copy to clipboard for easy sharing in chat
+        const log = `[${labelOverride || attr}] 3d6${totalMod >= 0 ? '+' : ''}${totalMod} = ${final} (${res.text})`;
+        const el = document.createElement('textarea');
+        el.value = log;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+    }
+
+    window.onload = () => {
+        setupAttributeInputs();
+        document.getElementById('charName').value = getData('name', '');
+        document.getElementById('charLevel').value = getData('level', 1);
+        document.getElementById('notesArea').value = getData('notes', '');
+        document.getElementById('equipmentArea').value = getData('equipment', '');
+        document.getElementById('damagePoints').value = getData('dp', 0);
+        document.getElementById('momentumPoints').value = getData('momentum', 0);
+        
+        const items = getData('active_items', []);
+        if (items.length === 0) {
+            addItemRow({ name: 'Baseball Bat', mod: 1, attr: 'Strength' });
+        } else {
+            items.forEach(item => addItemRow(item));
+        }
+
+        handleDamagePointsChange();
+    };
+</script>
+</body>
+</html>
