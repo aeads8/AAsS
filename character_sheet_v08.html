@@ -13,17 +13,18 @@
         .container {
             max-width: 550px;
         }
-        .attr-input {
-            appearance: textfield;
-            -webkit-appearance: none;
-            margin: 0;
+        /* Standardizing number input appearance */
+        input[type=number] {
             text-align: center;
+            padding-right: 8px; /* Offset arrows from the far right edge */
         }
-        .attr-input::-webkit-outer-spin-button,
-        .attr-input::-webkit-inner-spin-button {
+        /* Specific override for inputs where we want to hide arrows entirely (if any) */
+        .no-spinners::-webkit-outer-spin-button,
+        .no-spinners::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
+        
         .top-bar-input {
             text-align: center;
         }
@@ -67,7 +68,7 @@
         <div class="bg-gray-700 p-3 rounded-lg border border-gray-600 text-center flex flex-col justify-between">
             <h2 class="text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-tighter">Harm - Damage Points</h2>
             <div class="relative group">
-                <!-- Visible Display Overlay matched to text-lg and font-bold -->
+                <!-- Visible Display Overlay -->
                 <div id="damageOverlay" class="absolute inset-0 flex items-center justify-center pointer-events-none z-10 font-bold text-lg"></div>
                 <!-- Actual Input -->
                 <input type="number" id="damagePoints" value="0" min="0" 
@@ -224,7 +225,6 @@
         inputEl.value = currentDamage;
         inputEl.className = `top-bar-input w-full bg-gray-600 border rounded text-transparent font-bold h-10 text-center focus:text-transparent selection:bg-transparent ${borderColor}`;
         
-        // Status text is still shown but the value is text-lg to match Momentum
         overlayEl.textContent = `${currentDamage} - ${status}`;
         overlayEl.className = `absolute inset-0 flex items-center justify-center pointer-events-none z-10 font-bold text-lg ${colorClass}`;
         
