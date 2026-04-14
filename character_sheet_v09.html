@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Andrew's Asynchronous System (AAsS) Character Sheet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117;
+            color: #e5e7eb;
+        }
+        .container {
+            max-width: 550px;
+        }
+        /* Hide native spin buttons for mobile/desktop consistency */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="p-4 flex items-center justify-center min-h-screen">
+
+<div class="container bg-gray-800 p-6 sm:p-8 rounded-xl shadow-2xl w-full border border-gray-700">
+    
+    <h1 class="text-3xl font-bold text-indigo-400 mb-6 text-center">AAsS Character Sheet</h1>
+
+    <!-- Character Information -->
+    <div class="mb-6 bg-gray-700 p-4 rounded-lg border border-gray-600">
+        <div class="space-y-3">
+            <div class="flex items-center">
+                <label for="charName" class="w-1/4 text-gray-300 font-medium">Name:</label>
+                <input type="text" id="charName" class="w-3/4 px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white focus:ring-1 focus:ring-indigo-500" oninput="saveData('name', this.value)">
+            </div>
+            <div class="flex items-center">
+                <label class="w-1/4 text-gray-300 font-medium">Level:</label>
+                <div class="flex items-center bg-gray-600 border border-gray-500 rounded-lg overflow-hidden w-32">
+                    <button onclick="adjust('charLevel', -1)" class="w-10 h-10 flex items-center justify-center hover:bg-gray-500 transition-colors border-r border-gray-500 text-indigo-300 font-bold">-</button>
+                    <input type="number" id="charLevel" value="1" class="w-12 bg-transparent text-center text-white font-bold" readonly>
+                    <button onclick="adjust('charLevel', 1)" class="w-10 h-10 flex items-center justify-center hover:bg-gray-500 transition-colors border-l border-gray-500 text-indigo-300 font-bold">+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Momentum, Harm, and Global Modifier -->
+    <div class="grid grid-cols-3 gap-2 mb-6">
+        <!-- Momentum -->
+        <div class="bg-gray-700 p-2 rounded-lg border border-gray-600 text-center flex flex-col items-center">
+            <h2 class="text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-tighter">Momentum</h2>
+            <div class="flex items-center bg-gray-600 border border-gray-500 rounded w-full overflow-hidden">
+                <button onclick="adjust('momentumPoints', -1)" class="flex-1 h-8 hover:bg-gray-500 text-indigo-300 font-bold border-r border-gray-500">-</button>
+                <input type="number" id="momentumPoints" value="0" class="w-8 bg-transparent text-center text-white font-bold text-sm" readonly>
+                <button onclick="adjust('momentumPoints', 1)" class="flex-1 h-8 hover:bg-gray-500 text-indigo-300 font-bold border-l border-gray-500">+</button>
+            </div>
+        </div>
+        
+        <!-- Harm -->
+        <div class="bg-gray-700 p-2 rounded-lg border border-gray-600 text-center flex flex-col items-center">
+            <h2 class="text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-tighter">Harm</h2>
+            <div class="flex items-center bg-gray-600 border border-gray-500 rounded w-full overflow-hidden">
+                <button onclick="adjustDamage(-1)" class="flex-1 h-8 hover:bg-gray-500 text-red-400 font-bold border-r border-gray-500">-</button>
+                <input type="number" id="damagePoints" value="0" class="w-8 bg-transparent text-center text-white font-bold text-sm" readonly>
+                <button onclick="adjustDamage(1)" class="flex-1 h-8 hover:bg-gray-500 text-red-400 font-bold border-l border-gray-500">+</button>
+            </div>
+            <div id="harmLabel" class="text-[9px] mt-1 font-bold uppercase text-green-400">Healthy</div>
+        </div>
+        
+        <!-- Global Modifier -->
+        <div class="bg-gray-700 p-2 rounded-lg border border-gray-600 text-center flex flex-col items-center">
+            <h2 class="text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-tighter">Global Mod</h2>
+            <div class="flex items-center bg-gray-600 border border-gray-500 rounded w-full overflow-hidden">
+                <button onclick="adjust('tempBonus', -1)" class="flex-1 h-8 hover:bg-gray-500 text-indigo-300 font-bold border-r border-gray-500">-</button>
+                <input type="number" id="tempBonus" value="0" class="w-8 bg-transparent text-center text-white font-bold text-sm" readonly>
+                <button onclick="adjust('tempBonus', 1)" class="flex-1 h-8 hover:bg-gray-500 text-indigo-300 font-bold border-l border-gray-500">+</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Abilities -->
+    <div class="mb-6 bg-gray-700 p-4 rounded-lg border border-gray-600">
+        <div class="flex justify-between items-center mb-4 border-b border-gray-600 pb-2">
+            <h2 class="text-xl font-semibold text-gray-200">Abilities</h2>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest italic">3d6 + Mods</span>
+        </div>
+        
+        <div id="attributeInputs" class="space-y-4"></div>
+    </div>
+
+    <!-- Active Items -->
+    <div class="mb-6 bg-gray-700 p-4 rounded-lg border border-gray-600">
+        <div class="flex justify-between items-center mb-3">
+            <h2 class="text-sm font-bold text-indigo-300 uppercase">Active Items</h2>
+            <button onclick="addItemRow()" class="text-[10px] bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1 rounded">+ Add Item</button>
+        </div>
+        <div id="itemsContainer" class="space-y-2"></div>
+    </div>
+
+    <!-- Roll Results -->
+    <div id="results" class="mb-6 p-5 bg-gray-900 rounded-xl border-2 border-indigo-500 hidden">
+        <div class="text-center mb-1">
+            <span id="checkLabel" class="text-indigo-400 font-extrabold text-sm uppercase tracking-widest"></span>
+        </div>
+        <div class="flex justify-around items-center mb-2">
+            <div class="text-center">
+                <p class="text-[10px] text-gray-500 uppercase">Mod</p>
+                <div id="totalModDisplay" class="text-lg font-bold text-indigo-300"></div>
+            </div>
+            <div id="finalTotal" class="text-6xl font-black text-white px-4"></div>
+            <div class="text-center">
+                <p class="text-[10px] text-gray-500 uppercase">Dice</p>
+                <div id="diceDisplay" class="text-lg font-mono text-yellow-400 font-bold"></div>
+            </div>
+        </div>
+        <div id="outcomeText" class="text-xl font-bold rounded-lg px-2 py-1 text-center"></div>
+        <p id="outcomeEffect" class="text-sm text-gray-300 mt-2 text-center italic"></p>
+    </div>
+
+    <!-- Gear & Notes -->
+    <div class="space-y-4">
+        <div class="bg-gray-700 p-4 rounded-lg border border-gray-600">
+            <h2 class="text-sm font-bold text-gray-400 uppercase mb-2">General Gear</h2>
+            <textarea id="equipmentArea" rows="3" class="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-sm text-white" oninput="saveData('equipment', this.value)"></textarea>
+        </div>
+        <div class="bg-gray-700 p-4 rounded-lg border border-gray-600">
+            <h2 class="text-sm font-bold text-gray-400 uppercase mb-2">Notes</h2>
+            <textarea id="notesArea" rows="3" class="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-sm text-white" oninput="saveData('notes', this.value)"></textarea>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ATTRIBUTES = ['Strength', 'Dexterity', 'Wit', 'Soul'];
+    const STORAGE_KEY_PREFIX = 'AAsS_v4_';
+
+    const saveData = (key, val) => localStorage.setItem(`${STORAGE_KEY_PREFIX}${key}`, typeof val === 'object' ? JSON.stringify(val) : val);
+    const getData = (key, def) => {
+        const v = localStorage.getItem(`${STORAGE_KEY_PREFIX}${key}`);
+        if (v === null) return def;
+        try { return JSON.parse(v); } catch(e) { return v; }
+    };
+
+    function adjust(id, delta) {
+        const input = document.getElementById(id);
+        let val = (parseInt(input.value) || 0) + delta;
+        
+        if (id === 'charLevel' && val < 1) val = 1;
+        if (id === 'momentumPoints') {
+            if (val < 0) val = 0;
+            if (val > 10) val = 10;
+        }
+
+        input.value = val;
+        saveData(id, val);
+        
+        if (id.startsWith('bonus_')) {
+            saveData(id, val);
+        }
+    }
+
+    function setupAttributeInputs() {
+        const container = document.getElementById('attributeInputs');
+        ATTRIBUTES.forEach(attr => {
+            const val = getData('bonus_'+attr, 0);
+            const row = document.createElement('div');
+            row.className = "flex items-center justify-between gap-4";
+            row.innerHTML = `
+                <div class="w-20 text-gray-300 font-bold uppercase text-xs tracking-wide">${attr}</div>
+                
+                <div class="flex items-center bg-gray-600 border border-gray-500 rounded-lg overflow-hidden h-10 w-32">
+                    <button onclick="adjust('bonus_${attr}', -1)" class="w-10 h-full hover:bg-gray-500 text-indigo-300 font-bold border-r border-gray-500">-</button>
+                    <input type="number" id="bonus_${attr}" value="${val}" class="w-12 bg-transparent text-center text-white font-bold" readonly>
+                    <button onclick="adjust('bonus_${attr}', 1)" class="w-10 h-full hover:bg-gray-500 text-indigo-300 font-bold border-l border-gray-500">+</button>
+                </div>
+
+                <button onclick="roll('${attr}')" class="roll-btn flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-black py-2 rounded-lg text-xs uppercase transition active:scale-95 shadow-md h-10">Roll</button>
+            `;
+            container.appendChild(row);
+        });
+    }
+
+    function addItemRow(data = { name: '', mod: 0, attr: 'Strength' }) {
+        const div = document.createElement('div');
+        div.className = "item-row flex gap-2 items-center bg-gray-600/50 p-2 rounded-md border border-gray-600";
+        div.innerHTML = `
+            <input type="text" placeholder="Item Name" value="${data.name}" 
+                   class="item-name flex-1 min-w-0 bg-gray-600 border-none rounded px-2 py-1 text-xs text-white" 
+                   oninput="saveItems()">
+            
+            <div class="flex items-center bg-gray-600 border border-gray-500 rounded h-7 w-20 shrink-0">
+                <button onclick="adjustItemMod(this, -1)" class="w-6 h-full hover:bg-gray-500 text-indigo-300 font-bold border-r border-gray-500">-</button>
+                <input type="number" value="${data.mod}" class="item-mod w-8 bg-transparent text-center text-white text-[10px] font-bold" readonly>
+                <button onclick="adjustItemMod(this, 1)" class="w-6 h-full hover:bg-gray-500 text-indigo-300 font-bold border-l border-gray-500">+</button>
+            </div>
+
+            <select class="item-attr bg-gray-600 border-none rounded px-1 py-1 text-[10px] text-white text-center w-24 shrink-0" 
+                    onchange="saveItems()">
+                ${ATTRIBUTES.map(a => `<option value="${a}" ${data.attr === a ? 'selected' : ''}>${a}</option>`).join('')}
+            </select>
+            <button onclick="rollFromItem(this)" 
+                    class="bg-indigo-500 hover:bg-indigo-400 text-white px-2 py-1 rounded text-[10px] font-bold uppercase shrink-0">Roll</button>
+            <button onclick="this.parentElement.remove(); saveItems();" class="text-red-400 hover:text-red-300 font-bold px-1 shrink-0">×</button>
+        `;
+        document.getElementById('itemsContainer').appendChild(div);
+    }
+
+    function adjustItemMod(btn, delta) {
+        const input = btn.parentElement.querySelector('input');
+        input.value = (parseInt(input.value) || 0) + delta;
+        saveItems();
+    }
+
+    function saveItems() {
+        const items = Array.from(document.querySelectorAll('.item-row')).map(row => ({
+            name: row.querySelector('.item-name').value,
+            mod: parseInt(row.querySelector('.item-mod').value) || 0,
+            attr: row.querySelector('.item-attr').value
+        }));
+        saveData('active_items', items);
+    }
+
+    function adjustDamage(delta) {
+        const input = document.getElementById('damagePoints');
+        let val = (parseInt(input.value) || 0) + delta;
+        if (val < 0) val = 0;
+        input.value = val;
+        updateDamageDisplay();
+    }
+
+    function updateDamageDisplay() {
+        const val = parseInt(document.getElementById('damagePoints').value) || 0;
+        saveData('dp', val);
+        
+        let status = 'Healthy', color = 'text-green-400';
+        if (val >= 6) { status = 'Broken'; color = 'text-red-600'; }
+        else if (val >= 4) { status = 'Injured'; color = 'text-red-400'; }
+        else if (val >= 2) { status = 'Bruised'; color = 'text-orange-400'; }
+        
+        const label = document.getElementById('harmLabel');
+        label.textContent = status;
+        label.className = `text-[9px] mt-1 font-bold uppercase ${color}`;
+        
+        document.querySelectorAll('.roll-btn').forEach(b => b.disabled = val >= 6);
+    }
+
+    function rollFromItem(btn) {
+        const row = btn.parentElement;
+        const name = row.querySelector('.item-name').value;
+        const mod = parseInt(row.querySelector('.item-mod').value) || 0;
+        const attr = row.querySelector('.item-attr').value;
+        roll(attr, mod, name);
+    }
+
+    function roll(attr, itemMod = 0, labelOverride = null) {
+        const dp = parseInt(document.getElementById('damagePoints').value) || 0;
+        let harmPenalty = 0;
+        if (dp >= 6) return;
+        if (dp >= 4) harmPenalty = -2;
+        else if (dp >= 2) harmPenalty = -1;
+
+        const attrBonus = parseInt(document.getElementById(`bonus_${attr}`).value) || 0;
+        const tempMod = parseInt(document.getElementById('tempBonus').value) || 0;
+        const totalMod = attrBonus + harmPenalty + tempMod + itemMod;
+
+        const d = [Math.floor(Math.random()*6)+1, Math.floor(Math.random()*6)+1, Math.floor(Math.random()*6)+1];
+        const sum = d.reduce((a, b) => a + b, 0);
+        const final = sum + totalMod;
+
+        let res = { text: 'Critical Failure', color: 'bg-red-700 text-white', effect: 'Disaster! GM gains 2 Tension.' };
+        if (final >= 15) res = { text: 'Critical Success', color: 'bg-indigo-600 text-white', effect: 'Perfect! Gain 2 Momentum.' };
+        else if (final >= 11) res = { text: 'Full Success', color: 'bg-emerald-500 text-gray-900', effect: 'You do it. Gain 1 Momentum.' };
+        else if (final >= 7) res = { text: 'Mixed Success', color: 'bg-amber-500 text-gray-900', effect: 'Success, but at a cost. GM gains 1 Tension.' };
+
+        document.getElementById('checkLabel').textContent = labelOverride ? `${labelOverride} (${attr})` : `${attr} Check`;
+        document.getElementById('totalModDisplay').textContent = (totalMod >= 0 ? '+' : '') + totalMod;
+        document.getElementById('diceDisplay').textContent = d.join('+');
+        document.getElementById('finalTotal').textContent = final;
+        
+        const outcomeEl = document.getElementById('outcomeText');
+        outcomeEl.textContent = res.text;
+        outcomeEl.className = `text-xl font-bold rounded-lg px-2 py-1 mt-1 text-center ${res.color}`;
+        document.getElementById('outcomeEffect').textContent = res.effect;
+        document.getElementById('results').classList.remove('hidden');
+
+        const log = `[${labelOverride || attr}] 3d6${totalMod >= 0 ? '+' : ''}${totalMod} = ${final} (${res.text})`;
+        const el = document.createElement('textarea');
+        el.value = log;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+    }
+
+    window.onload = () => {
+        document.getElementById('charName').value = getData('name', '');
+        document.getElementById('charLevel').value = getData('charLevel', 1);
+        document.getElementById('notesArea').value = getData('notes', '');
+        document.getElementById('equipmentArea').value = getData('equipment', '');
+        document.getElementById('momentumPoints').value = getData('momentumPoints', 0);
+        document.getElementById('tempBonus').value = getData('tempBonus', 0);
+        document.getElementById('damagePoints').value = getData('dp', 0);
+        
+        setupAttributeInputs();
+        
+        const items = getData('active_items', []);
+        if (items.length > 0) items.forEach(item => addItemRow(item));
+        else addItemRow({ name: 'Baseball Bat [example]', mod: 1, attr: 'Strength' });
+
+        updateDamageDisplay();
+    };
+</script>
+
+</body>
+</html>
