@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AAsS Quick Reference</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117;
+            color: #e5e7eb;
+        }
+        .card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 0.75rem;
+        }
+        .bar-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 180px;
+            padding-top: 40px;
+        }
+        .bar {
+            flex: 1;
+            transition: height 0.3s ease;
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+        .pct {
+            position: absolute;
+            top: -22px;
+            font-size: 8px;
+            font-weight: 800;
+            color: #ffffff;
+            writing-mode: horizontal-tb;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        .roll-label {
+            font-size: 9px;
+            font-family: monospace;
+            color: #ffffff;
+            margin-top: 8px;
+            width: 100%;
+            text-align: center;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-2xl mx-auto">
+        <header class="mb-8 text-center border-b border-gray-800 pb-6">
+            <h1 class="text-3xl font-bold text-indigo-400">AAsS Quick Reference</h1>
+        </header>
+
+        <!-- Probability Chart Section -->
+        <section class="mb-8">
+            <h2 class="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-4 ml-1">The Bell Curve (3d6 Distribution)</h2>
+            <div class="card p-6">
+                <div class="bar-container">
+                    <!-- Probability weights for 3d6 -->
+                    <div class="bar bg-red-700" style="height: 4.6%"><span class="pct">0.5%</span></div>
+                    <div class="bar bg-red-700" style="height: 13.9%"><span class="pct">1.4%</span></div>
+                    <div class="bar bg-red-700" style="height: 27.8%"><span class="pct">2.8%</span></div>
+                    <div class="bar bg-red-700" style="height: 46.3%"><span class="pct">4.6%</span></div>
+                    <div class="bar bg-amber-500" style="height: 69.4%"><span class="pct">6.9%</span></div>
+                    <div class="bar bg-amber-500" style="height: 97.2%"><span class="pct">9.7%</span></div>
+                    <div class="bar bg-amber-500" style="height: 115.7%"><span class="pct">11.6%</span></div>
+                    <div class="bar bg-amber-500" style="height: 125.0%"><span class="pct">12.5%</span></div>
+                    <div class="bar bg-emerald-500" style="height: 125.0%"><span class="pct">12.5%</span></div>
+                    <div class="bar bg-emerald-500" style="height: 115.7%"><span class="pct">11.6%</span></div>
+                    <div class="bar bg-emerald-500" style="height: 97.2%"><span class="pct">9.7%</span></div>
+                    <div class="bar bg-emerald-500" style="height: 69.4%"><span class="pct">6.9%</span></div>
+                    <div class="bar bg-indigo-500" style="height: 46.3%"><span class="pct">4.6%</span></div>
+                    <div class="bar bg-indigo-500" style="height: 27.8%"><span class="pct">2.8%</span></div>
+                    <div class="bar bg-indigo-500" style="height: 13.9%"><span class="pct">1.4%</span></div>
+                    <div class="bar bg-indigo-500" style="height: 4.6%"><span class="pct">0.5%</span></div>
+                </div>
+                
+                <!-- Roll Totals (X-Axis) -->
+                <div class="flex gap-1 justify-between px-0.5 border-t border-gray-800 mt-1">
+                    <div class="roll-label">3</div>
+                    <div class="roll-label">4</div>
+                    <div class="roll-label">5</div>
+                    <div class="roll-label">6</div>
+                    <div class="roll-label">7</div>
+                    <div class="roll-label">8</div>
+                    <div class="roll-label">9</div>
+                    <div class="roll-label">10</div>
+                    <div class="roll-label">11</div>
+                    <div class="roll-label">12</div>
+                    <div class="roll-label">13</div>
+                    <div class="roll-label">14</div>
+                    <div class="roll-label">15</div>
+                    <div class="roll-label">16</div>
+                    <div class="roll-label">17</div>
+                    <div class="roll-label">18</div>
+                </div>
+                
+                <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px] font-bold uppercase">
+                    <div class="flex items-center gap-1.5 p-2 bg-red-900/20 rounded border border-red-900/30">
+                        <span class="w-2 h-2 rounded-full bg-red-700"></span> Fail (9.2%)
+                    </div>
+                    <div class="flex items-center gap-1.5 p-2 bg-amber-900/20 rounded border border-amber-900/30">
+                        <span class="w-2 h-2 rounded-full bg-amber-500"></span> Mixed (40.7%)
+                    </div>
+                    <div class="flex items-center gap-1.5 p-2 bg-emerald-900/20 rounded border border-emerald-900/30">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Full (40.7%)
+                    </div>
+                    <div class="flex items-center gap-1.5 p-2 bg-indigo-900/20 rounded border border-indigo-900/30">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500"></span> Crit (9.2%)
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Success Tiers Table -->
+        <section class="mb-8">
+            <h2 class="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-3 ml-1">Success Thresholds</h2>
+            <div class="card overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-800/50 text-[10px] uppercase text-gray-400">
+                            <th class="p-3 border-b border-gray-700">Total</th>
+                            <th class="p-3 border-b border-gray-700">Outcome</th>
+                            <th class="p-3 border-b border-gray-700">Edge/Doom</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm">
+                        <tr class="border-b border-gray-800">
+                            <td class="p-3 font-bold text-indigo-400">15+</td>
+                            <td class="p-3">Critical Success</td>
+                            <td class="p-3 text-indigo-300">+2 Edge</td>
+                        </tr>
+                        <tr class="border-b border-gray-800">
+                            <td class="p-3 font-bold text-emerald-400">11-14</td>
+                            <td class="p-3">Full Success</td>
+                            <td class="p-3 text-emerald-300">+1 Edge</td>
+                        </tr>
+                        <tr class="border-b border-gray-800">
+                            <td class="p-3 font-bold text-amber-400">7-10</td>
+                            <td class="p-3">Mixed Success</td>
+                            <td class="p-3 text-amber-300">+1 Doom</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold text-red-500">6-</td>
+                            <td class="p-3">Critical Failure</td>
+                            <td class="p-3 text-red-400">+2 Doom</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Harm Penalties -->
+        <section class="mb-8">
+            <h2 class="text-xs font-bold uppercase tracking-widest text-rose-300 mb-3 ml-1">Harm & Status Effects</h2>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="card p-3 flex flex-col items-center">
+                    <span class="text-green-400 font-bold">0-1 Damage Points</span>
+                    <span class="text-[10px] uppercase text-gray-500">Healthy</span>
+                    <span class="text-lg font-black mt-1">+0</span>
+                </div>
+                <div class="card p-3 flex flex-col items-center border-amber-900/30">
+                    <span class="text-amber-400 font-bold">2-3 Damage Points</span>
+                    <span class="text-[10px] uppercase text-gray-500">Bruised</span>
+                    <span class="text-lg font-black mt-1 text-amber-500">-1 Penalty</span>
+                </div>
+                <div class="card p-3 flex flex-col items-center border-orange-900/30">
+                    <span class="text-orange-400 font-bold">4-5 Damage Points</span>
+                    <span class="text-[10px] uppercase text-gray-500">Injured</span>
+                    <span class="text-lg font-black mt-1 text-orange-500">-2 Penalty</span>
+                </div>
+                <div class="card p-3 flex flex-col items-center border-red-900/50">
+                    <span class="text-red-500 font-bold">6+ Damage Points</span>
+                    <span class="text-[10px] uppercase text-gray-500">Broken</span>
+                    <span class="text-sm font-bold mt-1 text-red-600">No Actions</span>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
