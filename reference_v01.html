@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AAsS Quick Reference</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117;
+            color: #e5e7eb;
+        }
+        .card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .bar-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 200px;
+            padding-top: 40px;
+            position: relative;
+        }
+        .bar {
+            flex: 1;
+            transition: all 0.3s ease;
+            border-radius: 4px 4px 2px 2px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+        .bar:hover {
+            filter: brightness(1.2);
+            transform: translateY(-2px);
+        }
+        .pct {
+            position: absolute;
+            top: -24px;
+            font-size: 9px;
+            font-weight: 800;
+            color: #94a3b8;
+            white-space: nowrap;
+        }
+        .roll-label {
+            font-size: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            color: #64748b;
+            margin-top: 10px;
+            width: 100%;
+            text-align: center;
+            font-weight: 600;
+        }
+        .grid-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            border-top: 1px dashed #30363d;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-2xl mx-auto">
+        <header class="mb-10 text-center border-b border-gray-800 pb-8">
+            <h1 class="text-4xl font-black text-white tracking-tight text-center">AAsS <span class="text-indigo-500">Quick Reference</span></h1>
+        </header>
+
+        <!-- Probability Chart Section -->
+        <section class="mb-10">
+            <div class="flex justify-between items-end mb-4 px-1">
+                <h2 class="text-xs font-bold uppercase tracking-widest text-indigo-400">Probability Distribution (3d6)</h2>
+            </div>
+            
+            <div class="card p-6 md:p-8">
+                <div class="bar-container">
+                    <!-- Grid Lines for reference -->
+                    <div class="grid-line" style="bottom: 12.5%"></div>
+                    <div class="grid-line" style="bottom: 50%"></div>
+                    <div class="grid-line" style="bottom: 100%"></div>
+
+                    <!-- 3: 0.46% -->
+                    <div class="bar bg-rose-600" style="height: 3.6%"><span class="pct">0.5%</span></div>
+                    <!-- 4: 1.39% -->
+                    <div class="bar bg-rose-600" style="height: 11.1%"><span class="pct">1.4%</span></div>
+                    <!-- 5: 2.78% -->
+                    <div class="bar bg-rose-600" style="height: 22.2%"><span class="pct">2.8%</span></div>
+                    <!-- 6: 4.63% -->
+                    <div class="bar bg-rose-600" style="height: 37.0%"><span class="pct">4.6%</span></div>
+                    
+                    <!-- 7: 6.94% -->
+                    <div class="bar bg-amber-500" style="height: 55.6%"><span class="pct">6.9%</span></div>
+                    <!-- 8: 9.72% -->
+                    <div class="bar bg-amber-500" style="height: 77.8%"><span class="pct">9.7%</span></div>
+                    <!-- 9: 11.57% -->
+                    <div class="bar bg-amber-500" style="height: 92.6%"><span class="pct">11.6%</span></div>
+                    <!-- 10: 12.5% -->
+                    <div class="bar bg-amber-500" style="height: 100%"><span class="pct">12.5%</span></div>
+                    
+                    <!-- 11: 12.5% -->
+                    <div class="bar bg-emerald-500" style="height: 100%"><span class="pct">12.5%</span></div>
+                    <!-- 12: 11.57% -->
+                    <div class="bar bg-emerald-500" style="height: 92.6%"><span class="pct">11.6%</span></div>
+                    <!-- 13: 9.72% -->
+                    <div class="bar bg-emerald-500" style="height: 77.8%"><span class="pct">9.7%</span></div>
+                    <!-- 14: 6.94% -->
+                    <div class="bar bg-emerald-500" style="height: 55.6%"><span class="pct">6.9%</span></div>
+                    
+                    <!-- 15: 4.63% -->
+                    <div class="bar bg-indigo-500" style="height: 37.0%"><span class="pct">4.6%</span></div>
+                    <!-- 16: 2.78% -->
+                    <div class="bar bg-indigo-500" style="height: 22.2%"><span class="pct">2.8%</span></div>
+                    <!-- 17: 1.39% -->
+                    <div class="bar bg-indigo-500" style="height: 11.1%"><span class="pct">1.4%</span></div>
+                    <!-- 18: 0.46% -->
+                    <div class="bar bg-indigo-500" style="height: 3.6%"><span class="pct">0.5%</span></div>
+                </div>
+                
+                <!-- Roll Totals (X-Axis) -->
+                <div class="flex gap-1 justify-between px-0.5 border-t border-gray-800 mt-2">
+                    <div class="roll-label">3</div>
+                    <div class="roll-label">4</div>
+                    <div class="roll-label">5</div>
+                    <div class="roll-label">6</div>
+                    <div class="roll-label">7</div>
+                    <div class="roll-label">8</div>
+                    <div class="roll-label">9</div>
+                    <div class="roll-label">10</div>
+                    <div class="roll-label">11</div>
+                    <div class="roll-label">12</div>
+                    <div class="roll-label">13</div>
+                    <div class="roll-label">14</div>
+                    <div class="roll-label">15</div>
+                    <div class="roll-label">16</div>
+                    <div class="roll-label">17</div>
+                    <div class="roll-label">18</div>
+                </div>
+                
+                <div class="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-3 text-[10px] font-bold uppercase tracking-tight">
+                    <div class="flex items-center gap-2 p-3 bg-rose-500/10 rounded-lg border border-rose-500/20">
+                        <span class="w-2.5 h-2.5 rounded-sm bg-rose-600"></span> 
+                        <div>
+                            <div class="text-rose-400">Fail</div>
+                            <div class="text-gray-500 font-mono">9.3%</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                        <span class="w-2.5 h-2.5 rounded-sm bg-amber-500"></span> 
+                        <div>
+                            <div class="text-amber-400">Mixed</div>
+                            <div class="text-gray-500 font-mono">40.7%</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                        <span class="w-2.5 h-2.5 rounded-sm bg-emerald-500"></span> 
+                        <div>
+                            <div class="text-emerald-400">Full</div>
+                            <div class="text-gray-500 font-mono">40.7%</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 p-3 bg-indigo-500/10 rounded-lg border border-indigo-500/20">
+                        <span class="w-2.5 h-2.5 rounded-sm bg-indigo-500"></span> 
+                        <div>
+                            <div class="text-indigo-400">Crit</div>
+                            <div class="text-gray-500 font-mono">9.3%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Success Tiers Table -->
+        <section class="mb-10">
+            <h2 class="text-xs font-bold uppercase tracking-widest text-indigo-400 mb-4 ml-1">Success Thresholds</h2>
+            <div class="card overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-800/30 text-[10px] uppercase text-gray-500 tracking-widest">
+                            <th class="p-4 border-b border-gray-700 font-black">Total</th>
+                            <th class="p-4 border-b border-gray-700 font-black">Outcome</th>
+                            <th class="p-4 border-b border-gray-700 font-black">Resolution Effect</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm">
+                        <tr class="border-b border-gray-800/50 hover:bg-white/[0.02] transition-colors">
+                            <td class="p-4 font-black text-indigo-400 text-lg">15+</td>
+                            <td class="p-4 font-bold text-white">Critical Success</td>
+                            <td class="p-4 text-gray-400">Perfect outcome. <span class="text-indigo-300 font-bold">+2 Power</span></td>
+                        </tr>
+                        <tr class="border-b border-gray-800/50 hover:bg-white/[0.02] transition-colors">
+                            <td class="p-4 font-black text-emerald-400 text-lg">11–14</td>
+                            <td class="p-4 font-bold text-white">Full Success</td>
+                            <td class="p-4 text-gray-400">Goal achieved. <span class="text-emerald-300 font-bold">+1 Power</span></td>
+                        </tr>
+                        <tr class="border-b border-gray-800/50 hover:bg-white/[0.02] transition-colors">
+                            <td class="p-4 font-black text-amber-400 text-lg">7–10</td>
+                            <td class="p-4 font-bold text-white">Mixed Success</td>
+                            <td class="p-4 text-gray-400">Success at a cost. <span class="text-amber-300 font-bold">+1 Doom</span></td>
+                        </tr>
+                        <tr class="hover:bg-white/[0.02] transition-colors">
+                            <td class="p-4 font-black text-rose-500 text-lg">6-</td>
+                            <td class="p-4 font-bold text-white">Critical Failure</td>
+                            <td class="p-4 text-gray-400">Complication occurs. <span class="text-rose-400 font-bold">+2 Doom</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Harm Penalties -->
+        <section>
+            <h2 class="text-xs font-bold uppercase tracking-widest text-rose-400 mb-4 ml-1">Harm & Status Effects</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="card p-4 flex flex-col items-center justify-center text-center border-emerald-900/20">
+                    <span class="text-emerald-400 font-black text-sm">0–1 Harm</span>
+                    <span class="text-[9px] uppercase font-bold text-gray-500 tracking-tighter mb-2">Healthy</span>
+                    <div class="w-full bg-emerald-500/20 rounded py-1 text-xs font-bold text-emerald-300">+0</div>
+                </div>
+                <div class="card p-4 flex flex-col items-center justify-center text-center border-amber-900/20">
+                    <span class="text-amber-400 font-black text-sm">2–3 Harm</span>
+                    <span class="text-[9px] uppercase font-bold text-gray-500 tracking-tighter mb-2">Bruised</span>
+                    <div class="w-full bg-amber-500/20 rounded py-1 text-xs font-bold text-amber-300">-1 Penalty</div>
+                </div>
+                <div class="card p-4 flex flex-col items-center justify-center text-center border-orange-900/20">
+                    <span class="text-orange-400 font-black text-sm">4–5 Harm</span>
+                    <span class="text-[9px] uppercase font-bold text-gray-500 tracking-tighter mb-2">Injured</span>
+                    <div class="w-full bg-orange-500/20 rounded py-1 text-xs font-bold text-orange-300">-2 Penalty</div>
+                </div>
+                <div class="card p-4 flex flex-col items-center justify-center text-center border-rose-900/40">
+                    <span class="text-rose-500 font-black text-sm">6+ Harm</span>
+                    <span class="text-[9px] uppercase font-bold text-gray-500 tracking-tighter mb-2">Broken</span>
+                    <div class="w-full bg-rose-500/20 rounded py-1 text-xs font-bold text-rose-300 italic">No Actions</div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
