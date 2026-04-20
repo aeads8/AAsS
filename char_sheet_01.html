@@ -32,7 +32,7 @@
             color: white;
             font-weight: bold;
         }
-        /* Custom Stepper Button Styles with High-Contrast Borders */
+        /* Custom Stepper Button Styles */
         .stepper-btn {
             display: flex;
             align-items: center;
@@ -56,13 +56,30 @@
         .stepper-btn:active {
             transform: scale(0.95);
         }
-        /* Standardized Header Style for major sections */
         .section-header {
             font-size: 0.875rem; /* text-sm */
             font-weight: 700; /* font-bold */
             color: #a5b4fc; /* text-indigo-300 */
             text-transform: uppercase;
             letter-spacing: 0.1em; /* tracking-widest */
+        }
+
+        /* Specific Grid Layout for Active Items Second Line */
+        .item-controls-grid {
+            display: grid;
+            grid-template-columns: 30% 30% 30% 10%;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Force centering in select elements */
+        .centered-select {
+            text-align: center;
+            text-align-last: center;
+            -moz-appearance: none;
+            -webkit-appearance: none;
+            appearance: none;
+            padding-right: 0 !important; /* Remove standard arrow padding to truly center */
         }
     </style>
 </head>
@@ -75,12 +92,10 @@
     <!-- Character Information -->
     <div class="mb-6 bg-gray-700 p-4 rounded-lg border border-gray-600">
         <div class="space-y-3">
-            <!-- Name Row -->
             <div class="flex items-center justify-between gap-4">
                 <label for="charName" class="text-gray-400 font-bold uppercase text-[10px] tracking-widest w-1/4">Name</label>
-                <input type="text" id="charName" class="w-3/4 px-3 py-2 bg-gray-600 border border-gray-500 rounded text-white focus:ring-2 focus:ring-indigo-500 outline-none" oninput="saveCharInfo()">
+                <input type="text" id="charName" class="w-3/4 px-3 py-2 bg-gray-900 border border-gray-500 rounded text-white focus:ring-2 focus:ring-indigo-500 outline-none" oninput="saveCharInfo()">
             </div>
-            <!-- Level Row with Steppers -->
             <div class="flex items-center justify-between gap-4">
                 <label class="text-gray-400 font-bold uppercase text-[10px] tracking-widest w-1/4">Level</label>
                 <div class="w-3/4 flex items-center justify-between bg-gray-900 border border-gray-500 rounded-lg p-1">
@@ -94,7 +109,6 @@
 
     <!-- Power & Harm -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <!-- Power Stepper -->
         <div class="bg-gray-700 p-4 rounded-lg border border-gray-600 text-center">
             <h2 class="text-xs font-bold text-gray-400 mb-2 uppercase tracking-widest">Power</h2>
             <div class="flex items-center justify-between bg-gray-900 border border-gray-600 rounded-lg p-1.5">
@@ -103,7 +117,6 @@
                 <button onclick="stepValue('powerPoints', 1, 0, 10, savePower)" class="stepper-btn">＋</button>
             </div>
         </div>
-        <!-- Harm Stepper -->
         <div class="bg-gray-700 p-4 rounded-lg border border-gray-600 text-center">
             <h2 class="text-xs font-bold text-gray-400 mb-2 uppercase tracking-widest">Harm</h2>
             <div class="flex items-center justify-between bg-gray-900 border border-gray-600 rounded-lg p-1.5">
@@ -127,7 +140,7 @@
             <h2 class="section-header">Active Items</h2>
             <button onclick="addItemRow()" class="text-[10px] bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1 rounded tracking-widest uppercase font-bold transition">Add Item</button>
         </div>
-        <div id="activeItemsContainer" class="space-y-3"></div>
+        <div id="activeItemsContainer" class="space-y-4"></div>
     </div>
     
     <!-- Results Display -->
@@ -156,18 +169,18 @@
     <div class="space-y-4">
         <div class="bg-gray-700 p-4 rounded-lg border border-gray-600">
             <h2 class="section-header mb-2">General Equipment</h2>
-            <textarea id="equipmentArea" rows="2" class="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded text-sm text-white focus:ring-1 focus:ring-indigo-500 outline-none" oninput="saveEquipment()"></textarea>
+            <textarea id="equipmentArea" rows="2" class="w-full px-3 py-2 bg-gray-900 border border-gray-500 rounded text-sm text-white focus:ring-1 focus:ring-indigo-500 outline-none" oninput="saveEquipment()"></textarea>
         </div>
         <div class="bg-gray-700 p-4 rounded-lg border border-gray-600">
             <h2 class="section-header mb-2">Notes</h2>
-            <textarea id="notesArea" rows="2" class="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded text-sm text-white focus:ring-1 focus:ring-indigo-500 outline-none" oninput="saveNotes()"></textarea>
+            <textarea id="notesArea" rows="2" class="w-full px-3 py-2 bg-gray-900 border border-gray-500 rounded text-sm text-white focus:ring-1 focus:ring-indigo-500 outline-none" oninput="saveNotes()"></textarea>
         </div>
     </div>
 </div>
 
 <script>
     const ATTRIBUTES = ['Strength', 'Dexterity', 'Wit', 'Soul'];
-    const STORAGE_PREFIX = 'AASS_v6_';
+    const STORAGE_PREFIX = 'AASS_v9_';
 
     function saveData(key, val) { localStorage.setItem(STORAGE_PREFIX + key, typeof val === 'string' ? val : JSON.stringify(val)); }
     function getData(key, fallback) { 
@@ -250,12 +263,12 @@
         const id = Date.now() + Math.random();
         const container = document.getElementById('activeItemsContainer');
         const div = document.createElement('div');
-        div.className = 'flex items-center gap-2 bg-gray-800 p-2 rounded border border-gray-600 item-row';
+        div.className = 'bg-gray-800 p-3 rounded-lg border border-gray-600 item-row space-y-3';
         div.dataset.id = id;
         
         let attrOptions = ATTRIBUTES.map(a => {
             let label = a.substring(0, 3).toUpperCase();
-            if (a === 'Soul') label = 'SOUL'; // Show "SOUL" instead of "SOU"
+            if (a === 'Soul') label = 'SOUL';
             return `<option value="${a}" ${data.attr === a ? 'selected' : ''}>${label}</option>`;
         }).join('');
         
@@ -263,15 +276,39 @@
         for(let i=5; i>=-5; i--) modOptions += `<option value="${i}" ${data.mod == i ? 'selected' : ''}>${i > 0 ? '+' : ''}${i}</option>`;
 
         div.innerHTML = `
-            <input type="text" placeholder="Item..." value="${data.name}" class="item-name flex-1 min-w-0 bg-gray-700 border border-gray-500 rounded px-2 py-1 text-white text-xs focus:ring-1 focus:ring-indigo-500 outline-none" oninput="saveItems()">
-            <select class="item-mod bg-gray-700 border border-gray-500 rounded px-1 py-1 text-white text-[10px] font-bold" onchange="saveItems()">
-                ${modOptions}
-            </select>
-            <select class="item-attr bg-gray-700 border border-gray-500 rounded px-1 py-1 text-white text-[10px] uppercase font-bold" onchange="saveItems()">
-                ${attrOptions}
-            </select>
-            <button onclick="rollItem('${id}')" class="roll-btn bg-emerald-600 hover:bg-emerald-500 text-white font-black px-3 py-1 rounded text-[10px] whitespace-nowrap uppercase tracking-tighter border border-emerald-400 transition">Roll</button>
-            <button onclick="this.parentElement.remove(); saveItems();" class="text-gray-500 hover:text-red-400 px-1 font-bold text-lg">×</button>
+            <div class="flex items-center">
+                <input type="text" placeholder="Item/Weapon Name..." value="${data.name}" class="item-name w-full bg-gray-900 border border-gray-500 rounded px-3 py-2 text-white text-sm focus:ring-2 focus:ring-indigo-500 outline-none" oninput="saveItems()">
+            </div>
+            
+            <div class="item-controls-grid">
+                <!-- Mod (30%) - Centered Numbers -->
+                <div class="flex flex-col gap-1">
+                    <span class="text-[8px] uppercase font-bold text-gray-500 text-center tracking-tighter">Mod</span>
+                    <select class="item-mod centered-select bg-gray-700 border border-gray-500 rounded px-1 py-1 text-white text-xs font-bold w-full appearance-none" onchange="saveItems()">
+                        ${modOptions}
+                    </select>
+                </div>
+                
+                <!-- Ability (30%) - Centered Text -->
+                <div class="flex flex-col gap-1">
+                    <span class="text-[8px] uppercase font-bold text-gray-500 text-center tracking-tighter">Ability</span>
+                    <select class="item-attr centered-select bg-gray-700 border border-gray-500 rounded px-1 py-1 text-white text-[10px] uppercase font-bold w-full appearance-none" onchange="saveItems()">
+                        ${attrOptions}
+                    </select>
+                </div>
+                
+                <!-- Roll (30%) -->
+                <div class="flex flex-col gap-1">
+                    <span class="opacity-0 text-[8px]">Roll</span>
+                    <button onclick="rollItem('${id}')" class="roll-btn bg-emerald-600 hover:bg-emerald-500 text-white font-black py-1.5 rounded text-[10px] uppercase tracking-widest border border-emerald-400 transition shadow-sm w-full">Roll</button>
+                </div>
+
+                <!-- Delete (10%) -->
+                <div class="flex flex-col gap-1 items-center">
+                    <span class="opacity-0 text-[8px]">X</span>
+                    <button onclick="this.closest('.item-row').remove(); saveItems();" class="text-gray-500 hover:text-red-400 font-bold text-xl leading-none">&times;</button>
+                </div>
+            </div>
         `;
         container.appendChild(div);
     }
@@ -344,7 +381,7 @@
         
         const items = getData('active_items', []);
         if (items.length > 0) items.forEach(item => addItemRow(item));
-        else addItemRow({ name: '[Baseball Bat - Example]', mod: 1, attr: 'Strength' });
+        else addItemRow({ name: 'Baseball Bat', mod: 1, attr: 'Strength' });
 
         handleDamagePointsChange();
     };
