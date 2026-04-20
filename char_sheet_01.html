@@ -43,7 +43,7 @@
             color: white;
             font-weight: bold;
             border-radius: 4px;
-            border: 2px solid #9ca3af; /* gray-400 - high contrast */
+            border: 2px solid #9ca3af; /* gray-400 */
             transition: all 0.2s ease;
             cursor: pointer;
             user-select: none;
@@ -92,15 +92,15 @@
         </div>
     </div>
 
-    <!-- Momentum & Harm -->
+    <!-- Power & Harm -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <!-- Momentum Stepper -->
+        <!-- Power Stepper -->
         <div class="bg-gray-700 p-4 rounded-lg border border-gray-600 text-center">
-            <h2 class="text-xs font-bold text-gray-400 mb-2 uppercase tracking-widest">Momentum</h2>
+            <h2 class="text-xs font-bold text-gray-400 mb-2 uppercase tracking-widest">Power</h2>
             <div class="flex items-center justify-between bg-gray-900 border border-gray-600 rounded-lg p-1.5">
-                <button onclick="stepValue('momentumPoints', -1, 0, 10, saveMomentum)" class="stepper-btn">－</button>
-                <input type="number" id="momentumPoints" value="0" readonly class="attr-input text-xl">
-                <button onclick="stepValue('momentumPoints', 1, 0, 10, saveMomentum)" class="stepper-btn">＋</button>
+                <button onclick="stepValue('powerPoints', -1, 0, 10, savePower)" class="stepper-btn">－</button>
+                <input type="number" id="powerPoints" value="0" readonly class="attr-input text-xl">
+                <button onclick="stepValue('powerPoints', 1, 0, 10, savePower)" class="stepper-btn">＋</button>
             </div>
         </div>
         <!-- Harm Stepper -->
@@ -167,7 +167,7 @@
 
 <script>
     const ATTRIBUTES = ['Strength', 'Dexterity', 'Wit', 'Soul'];
-    const STORAGE_PREFIX = 'AASS_v3_';
+    const STORAGE_PREFIX = 'AASS_v6_';
 
     function saveData(key, val) { localStorage.setItem(STORAGE_PREFIX + key, typeof val === 'string' ? val : JSON.stringify(val)); }
     function getData(key, fallback) { 
@@ -192,7 +192,7 @@
     }
     function saveNotes() { saveData('notes', document.getElementById('notesArea').value); }
     function saveEquipment() { saveData('equipment', document.getElementById('equipmentArea').value); }
-    function saveMomentum() { saveData('momentum', document.getElementById('momentumPoints').value); }
+    function savePower() { saveData('power', document.getElementById('powerPoints').value); }
 
     function calculateHarmStatus(dp) {
         if (dp >= 6) return { status: 'Broken', penalty: -99, color: 'text-red-500' };
@@ -253,7 +253,12 @@
         div.className = 'flex items-center gap-2 bg-gray-800 p-2 rounded border border-gray-600 item-row';
         div.dataset.id = id;
         
-        let attrOptions = ATTRIBUTES.map(a => `<option value="${a}" ${data.attr === a ? 'selected' : ''}>${a.substring(0,3)}</option>`).join('');
+        let attrOptions = ATTRIBUTES.map(a => {
+            let label = a.substring(0, 3).toUpperCase();
+            if (a === 'Soul') label = 'SOUL'; // Show "SOUL" instead of "SOU"
+            return `<option value="${a}" ${data.attr === a ? 'selected' : ''}>${label}</option>`;
+        }).join('');
+        
         let modOptions = '';
         for(let i=5; i>=-5; i--) modOptions += `<option value="${i}" ${data.mod == i ? 'selected' : ''}>${i > 0 ? '+' : ''}${i}</option>`;
 
@@ -303,10 +308,10 @@
         const sum = dice.reduce((a,b) => a+b, 0);
         const final = sum + totalMod;
 
-        let res = { text: 'Critical Failure', color: 'bg-red-700 text-white', effect: 'Gain 2 Tension.' };
-        if (final >= 15) res = { text: 'Critical Success', color: 'bg-green-700 text-white', effect: 'Gain 2 Momentum.' };
-        else if (final >= 11) res = { text: 'Full Success', color: 'bg-green-500 text-gray-900', effect: 'Gain 1 Momentum.' };
-        else if (final >= 7) res = { text: 'Mixed Success', color: 'bg-yellow-500 text-gray-900', effect: 'Gain 1 Tension.' };
+        let res = { text: 'Critical Failure', color: 'bg-red-700 text-white', effect: 'Add 2 Doom.' };
+        if (final >= 15) res = { text: 'Critical Success', color: 'bg-green-700 text-white', effect: 'Gain 2 Power.' };
+        else if (final >= 11) res = { text: 'Full Success', color: 'bg-green-500 text-gray-900', effect: 'Gain 1 Power.' };
+        else if (final >= 7) res = { text: 'Mixed Success', color: 'bg-yellow-500 text-gray-900', effect: 'Add 1 Doom.' };
 
         document.getElementById('checkAttributeName').textContent = labelOverride ? `${labelOverride} (${attr})` : `${attr} Check`;
         document.getElementById('totalBonusDisplay').textContent = (totalMod >= 0 ? '+' : '') + totalMod;
@@ -335,7 +340,7 @@
         document.getElementById('notesArea').value = getData('notes', '');
         document.getElementById('equipmentArea').value = getData('equipment', '');
         document.getElementById('damagePoints').value = getData('dp', 0);
-        document.getElementById('momentumPoints').value = getData('momentum', 0);
+        document.getElementById('powerPoints').value = getData('power', 0);
         
         const items = getData('active_items', []);
         if (items.length > 0) items.forEach(item => addItemRow(item));
